@@ -1,0 +1,19 @@
+vpc: ""
+alertNotifications: ""
+Resources:
+
+  SNSTopic: ${file(./sls/monitoring.yml):SNSTopic}
+
+  ApiGateway4XXError: ${file(./sls/monitoring.yml):ApiGateway4XXError}
+  ApiGateway5XXError: ${file(./sls/monitoring.yml):ApiGateway5XXError}
+  ApiGatewayLatency: ${file(./sls/monitoring.yml):ApiGatewayLatency}
+
+customDomain:
+  domainName: api-gaas-test.goodyear.eu
+  basePath: fitment
+  endpointType: regional
+  certificateName: api-gaas-tst.goodyear.eu
+  hostedZoneId: Z1U9ULNL0V5AJ3
+  stage: '${opt:stage, self:provider.stage}'
+  createRoute53Record: true
+  enabled: false

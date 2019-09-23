@@ -1,0 +1,201 @@
+---
+version: 2
+plan:
+  project-key: GAASPIP
+  key: GSGELMRV2
+  name: Example Lambda V2
+
+docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
+
+variables:
+  npm_pull_url: https://nexus.goodyear.eu/repository/gy-npm/
+  npm_push_url: https://nexus.goodyear.eu/repository/gaas-npm/
+  npm_token: BAMSCRT@0@0@xccbqyE/gJ9DRkBUne8voBW4lAUVCx8nAW7fzMej43M=
+
+stages:
+  - Build:
+    - Build
+  # - Sonar:
+  #     manual: true
+  #     jobs:
+  #       - Sonar
+
+Build:
+  tasks:
+    - clean
+    - script:
+        # - echo "BWD" && echo "${bamboo_build_working_directory}"
+        # - echo "NPMRC" && echo "${bamboo_npmrc}"
+        - export NPMRC="${bamboo_build_working_directory}/.npmrc"
+        - echo "EXPORT NPMRC" && echo ${NPMRC}
+        - echo "NPM GENERATE START"
+        - echo "registry=${bamboo_npm_pull_url}" > "${NPMRC}"
+        - echo "_auth=${bamboo_nexus_npm_secret_token}" >> "${NPMRC}"
+        - echo "strict-ssl=true" >> "${NPMRC}"
+        - echo "always-auth=true" >> "${NPMRC}"
+        - echo "email=gy@intellias.com" >> "${NPMRC}"
+        - echo "unsafe-perm=true" >> "${NPMRC}"
+        - echo "NPM END"
+        - npm config list
+        - npm install
+        - npm run lint
+        - npm run test
+        - rm -f "${NPMRC}"
+        - echo "NPM GENERATE START"
+        - echo "registry=${bamboo_npm_push_url}" > "${NPMRC}"
+        - echo "_auth=${bamboo_nexus_npm_secret_token}" >> "${NPMRC}"
+        - echo "strict-ssl=true" >> "${NPMRC}"
+        - echo "always-auth=true" >> "${NPMRC}"
+        - echo "email=gy@intellias.com" >> "${NPMRC}"
+        - echo "unsafe-perm=true" >> "${NPMRC}"
+        - echo "NPM END"
+        - npm publish --loglevel silly
+        - rm -f "${NPMRC}"
+
+    - test-parser:
+        type: mocha
+        test-results: 'test-report.json'
+  final-tasks:
+    - script:
+      - echo "Final task"
+  artifacts:
+     - name: package.json
+       pattern: package.json
+
+
+# Stage2:
+#   tasks:
+#     - script:
+#         - echo "Stage2 script"
+#   final-tasks:
+#     - script:
+#       - echo "Final task Stage2"
+
+# ---
+# version: 2
+# # docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
+# deployment:
+#   name: Example Lambda
+#   source-plan: GAASPIP-GSGELMR
+  
+
+# release-naming:
+#   next-version-name: 1.0.${bamboo.buildNumber}
+#   # auto-increment-variables:
+#   #   - release-number
+
+
+# environments:
+#   - Test
+#   - Staging
+#   - Production
+
+
+# Test:
+#   variables:
+#     gaas_deploy_stage: test
+#   docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
+#   tasks:
+#     - clean
+#     - artifact-download:
+#         destination: /
+#     - script:
+#         - bash ./deploy.sh || ./slack.sh deploy
+#   final-tasks:
+#     - script:
+#       - echo "Final task Test env"
+
+
+# Staging:
+#   variables:
+#     gaas_deploy_stage: test
+#   docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
+#   tasks:
+#     - clean
+#     - artifact-download:
+#         destination: /
+#     - script:
+#         - bash ./deploy.sh || ./slack.sh deploy
+#   final-tasks:
+#     - script:
+#       - echo "Final task Test env"
+
+
+# Production:
+#   variables:
+#     gaas_deploy_stage: test
+#   docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
+#   tasks:
+#     - clean
+#     - artifact-download:
+#         destination: /
+#     - script:
+#         - bash ./deploy.sh || ./slack.sh deploy
+#   final-tasks:
+#     - script:
+#       - echo "Final task Test env"
+
+# # ---
+# # version: 2
+# # plan:
+# #   key: GSGELMR
+
+# # plan-permissions:
+# #   - users:
+# #       - voshchypko@intellias.com
+# #     permissions:
+# #       - view
+# #       - edit
+# #       - build
+# #       - admin
+# #       # - clone
+
+
+# # ---
+# # version: 2
+# # deployment:
+# #   name: Example Lambda
+# #   source-plan: GAASPIP-GSGELMR
+
+# # # deployment-permissions:
+# # #   - users:
+# # #       - voshchypko@intellias.com
+# # #       - oladnov@intellias.com
+# # #     permissions:
+# # #       - view
+# # #       - edit
+
+# # # default-environment-permissions:
+# # #   - users:
+# # #       - voshchypko@intellias.com
+# # #       - oladnov@intellias.com
+# # #     permissions:
+# # #       - view
+# # #       - edit
+# # #       - deploy
+
+# # environment-permissions:
+# #   - Test:
+# #       - users:
+# #           - voshchypko@intellias.com
+# #           - oladnov@intellias.com
+# #         permissions:
+# #           - view
+# #   - Staging:
+# #       - users:
+# #           - voshchypko@intellias.com
+# #           - oladnov@intellias.com
+# #         permissions:
+# #           - view
+# #           - edit
+# #   - Production:
+# #       - users:
+# #           - voshchypko@intellias.com
+# #           - oladnov@intellias.com
+# #         permissions:
+# #           - view
+# #           - edit
+# #           - deploy
+
+
+# # https://jira.atlassian.com/browse/BAM-20553?attachmentViewMode=gallery

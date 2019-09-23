@@ -1,0 +1,102 @@
+service: fitment-lambda
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: eu-central-1
+  stage: stage
+  timeout: 20
+  environment:
+    API_VERSION: v1
+    STAGE: ${opt:stage, self:provider.stage}
+    VERSION: ${opt:version, '1.0'}
+    COMMIT_HASH: ${opt:commitHash, 'latest'}
+    DEPLOY_TIME: ${opt:deployTime, ''}
+  tracing: true # enable tracing
+  usagePlan: {}
+  iamRoleStatements:
+    - Effect: "Allow" # xray permissions (required)
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+        - "s3:*"
+        - "lambda:InvokeFunction"
+      Resource:
+        - "*"
+
+plugins:
+  - '@hewmen/serverless-plugin-typescript'
+  - serverless-offline
+  - serverless-plugin-warmup
+  - serverless-plugin-warmup-ts-adapter
+  - serverless-aws-documentation
+  - serverless-reqvalidator-plugin
+  - serverless-openapi-documentation
+  - serverless-domain-manager
+  - serverless-plugin-existing-s3
+  - serverless-plugin-tracing
+  - serverless-plugin-aws-alerts
+
+package:
+  individually: false
+  excludeDevDependencies: true
+  include:
+  - src/**/!(*.spec).js
+  exclude:
+  - src/**/*.ts
+
+functions:
+  healthStatus:
+    handler: src/health/status/handler.status
+    description: Test handler
+    events:
+    - http:
+        path: ${self:provider.environment.API_VERSION}/health/status
+        method: get
+        cors: true
+        documentation:
+          summary: Returns the result of a quick health status of the API.
+          description: Returns the result of a quick health status of the API.
+          tags:
+          - Health
+          methodResponses:
+          - statusCode: '200'
+            description: Returned when the operation is completed successfully.
+            responseModels:
+              "application/json": HealthStatusResponse
+
+custom:
+  warmup:
+    cleanFolder: false
+    timeout: 30
+    prewarm: true
+    package:
+      individually: false
+    enabled:
+      - staging
+      - prod
+  customDomain: ${file(./sls/${opt:stage, self:provider.stage}.yml):customDomain}
+  documentation:
+    models:
+    -
+      name: HealthStatusResponse
+      contentType: "application/json"
+      schema: ${file(node_modules/lambda-core/dist/swagger.yml):models.health}
+
+  alerts:
+    stages: ${file(node_modules/lambda-core/sls/alarms.yml):stages}
+    dashboards: true
+    topics:
+      ok: ${self:service}-${opt:stage, self:provider.stage}-alerts-ok
+      alarm:
+        topic: ${self:service}-${opt:stage, self:provider.stage}-alerts-alarm
+        notifications: ${file(./sls/${opt:stage, self:provider.stage}.yml):alertNotifications}
+    definitions: ${file(node_modules/lambda-core/sls/alarms.yml):definitions}
+    function:
+      - functionThrottles
+      - functionLogError
+      - functionErrors
+      - functionDeadLetterErrors
+
+resources:
+  Resources:
+    ${file(./sls/${opt:stage, self:provider.stage}.yml):Resources}

@@ -1,0 +1,10 @@
+{
+  "extends": "tslint-config-airbnb",
+  "rules": {
+    "max-line-length": [true, { "limit": 150 }],
+    "indent": [true, "spaces", 4],
+    "ter-indent": [true, 4, { "SwitchCase": 1 }],
+    "align": [true, "parameters", "statements"],
+    "no-unused-variable": false
+  }
+}

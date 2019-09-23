@@ -1,0 +1,42 @@
+vpc:
+    securityGroupIds:
+        - ${opt:vpcSecurityGroup, 'sg-0ebc272711a0bb87a'}
+    subnetIds:
+        "Fn::Split":
+            - ","
+            - ${opt:vpcSubnet, 'subnet-0bae2aff6ea3346ac,subnet-0cfc5c84e690e4875'}
+
+alertNotifications: ${file(node_modules/lambda-core/sls/alarms.yml):stagingAlertNotifications}
+Resources:
+  requestBodyValidator:
+    Type: 'AWS::ApiGateway::RequestValidator'
+    Properties:
+      Name: reqBodyValidator
+      RestApiId:
+        Ref: ApiGatewayRestApi
+      ValidateRequestBody: true
+      ValidateRequestParameters: false
+  requestParametersValidator:
+    Type: 'AWS::ApiGateway::RequestValidator'
+    Properties:
+      Name: reqParamsValidator
+      RestApiId:
+        Ref: ApiGatewayRestApi
+      ValidateRequestBody: false
+      ValidateRequestParameters: true
+
+  SNSTopic: ${file(./sls/monitoring.yml):SNSTopic}
+
+  ApiGateway4XXError: ${file(./sls/monitoring.yml):ApiGateway4XXError}
+  ApiGateway5XXError: ${file(./sls/monitoring.yml):ApiGateway5XXError}
+  ApiGatewayLatency: ${file(./sls/monitoring.yml):ApiGatewayLatency}
+
+customDomain:
+  domainName: api-gaas-staging.goodyear.eu
+  basePath: 'fitment'
+  endpointType: regional
+  certificateName: api-gaas-staging.goodyear.eu
+  hostedZoneId: Z1U9ULNL0V5AJ3
+  stage: ${opt:stage, self:provider.stage}
+  createRoute53Record: true
+  enabled: true

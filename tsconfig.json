@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "outDir": ".build",
+    "target": "es6",
+    "lib": [
+      "es6"
+    ],
+    "experimentalDecorators": true,
+    "moduleResolution": "node",
+    "rootDir": "./",
+    "sourceMap": true,
+    "allowJs": false,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noImplicitThis": true,
+    "strictNullChecks": true,
+    "strictPropertyInitialization": false,
+    "noImplicitReturns": true,
+    "preserveConstEnums": true,
+    "suppressImplicitAnyIndexErrors": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "allowSyntheticDefaultImports": false,
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "coverage"
+  ]
+}

@@ -1,0 +1,3 @@
+[submodule "ci-common"]
+	path = ci-common
+	url = git@bitbucket.org:emea_cf/ci-common.git

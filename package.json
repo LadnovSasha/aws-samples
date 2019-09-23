@@ -1,0 +1,59 @@
+{
+  "name": "fitment-lambda",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/src/index.js",
+  "scripts": {
+    "test": "jest -c jest.config.js",
+    "integration": "jest -c jest.config.integration.js",
+    "lint": "tslint -c tslint.json -p tsconfig.json",
+    "start": "serverless offline start --stage=local",
+    "deploy": "serverless deploy -v --stage=development",
+    "package": "serverless package -v",
+    "prepublishOnly": "tsc --outDir dist",
+    "validate": "lambda-validate ./package.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@bitbucket.org/emea_cf/fitment-lambda.git"
+  },
+  "dependencies": {
+    "aws-xray-sdk": "^2.3.4",
+    "fitment-interface": "1.0.1",
+    "lambda-core": "1.2.44",
+    "request": "^2.88.0",
+    "serverless-plugin-aws-alerts": "^1.4.0"
+  },
+  "devDependencies": {
+    "@hewmen/serverless-plugin-typescript": "^1.1.17",
+    "@types/aws-lambda": "^8.10.31",
+    "@types/jest": "^23.3.14",
+    "@types/node": "^10.14.13",
+    "@types/request": "^2.48.2",
+    "@types/request-promise": "^4.1.44",
+    "@types/sinon": "^7.0.13",
+    "@types/uuid": "^3.4.5",
+    "aws-sdk": "^2.498.0",
+    "jest": "^23.5.0",
+    "jest-bamboo-reporter": "^1.2.0",
+    "request-promise": "^4.2.4",
+    "serverless": "1.43.0",
+    "serverless-aws-documentation": "^1.1.0",
+    "serverless-domain-manager": "^2.6.13",
+    "serverless-offline": "^3.33.0",
+    "serverless-openapi-documentation": "^0.4.0",
+    "serverless-plugin-existing-s3": "^2.4.0",
+    "serverless-plugin-tracing": "^2.0.0",
+    "serverless-plugin-warmup": "^4.7.0-rc.1",
+    "serverless-plugin-warmup-ts-adapter": "^1.0.0",
+    "serverless-reqvalidator-plugin": "^1.0.2",
+    "sinon": "^6.3.5",
+    "ts-jest": "^23.10.5",
+    "tslint": "^5.18.0",
+    "tslint-config-airbnb": "^5.10.0",
+    "typescript": "^3.5.3"
+  },
+  "author": "Goodyear as a Service",
+  "license": "ISC",
+  "homepage": "https://bitbucket.org/emea_cf/fitment-lambda#readme"
+}
