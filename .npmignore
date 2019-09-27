@@ -1,0 +1,17 @@
+ci-common/
+bamboo-specs/
+reports/
+.scannerwork/
+false/
+.git/
+.gitignore
+.gitmodules
+_warmup/
+integrationTests/
+README.md
+*.log
+*.sh
+.npmrc
+artifact.tar
+.editorconfig
+release-upload-output.json
