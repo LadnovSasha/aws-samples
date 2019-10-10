@@ -2,13 +2,13 @@
 
 set -e
 
-access_key_id="${bamboo_aws_gaas_staging_access_key_id}"
-secret_access_key="${bamboo_aws_gaas_staging_secret_access_key}"
+access_key_id="${bamboo_aws_gaas_access_key_id}"
+secret_access_key="${bamboo_aws_gaas_secret_access_key}"
 aws_region="${bamboo_aws_default_region}"
-serverless_salt="${bamboo_fitment_lambda_staging_salt}"
-authorizerproviderarn="${bamboo_fitment_lambda_staging_authorizerproviderarn}"
-vpcsecuritygroup="${bamboo_fitment_lambda_staging_vpcsecuritygroup}"
-dbsubnetgroup="${bamboo_fitment_lambda_staging_dbsubnetgroup}"
-nautilusbrowserapikey="${bamboo_fitment_lambda_staging_nautilusbrowserapikey}"
-nautilusbookapikey="${bamboo_fitment_lambda_staging_nautilusbookapikey}"
-vpcsubnet="${bamboo_fitment_lambda_staging_vpcsubnet}"
+
+pg_user="${bamboo_lead_time_lambda_pg_user}"
+pg_password="${bamboo_lead_time_lambda_pg_password}"
+
+serverless_salt="${bamboo_lead_time_lambda_test_salt}"
+vpcsecuritygroup="${bamboo_fitment_lambda_test_vpcsecuritygroup}"
+vpcsubnet="${bamboo_fitment_lambda_test_vpcsubnet}"

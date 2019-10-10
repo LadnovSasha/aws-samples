@@ -3,9 +3,9 @@ version: 2
 plan:
   project-key: GAASPIP
   key: GSGFLV2A
-  name: Fitment Lambda V2a
+  name: Fitment Lambda V2
 
-docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
+docker: node:10-slim
 
 stages:
   - Build:
@@ -14,6 +14,7 @@ stages:
       manual: true
       jobs:
         - Sonar
+
 
 Build:
   tasks:
@@ -26,11 +27,10 @@ Build:
   final-tasks:
     - script:
       - echo "Final task"
+      - scripts/notifications.sh build
   artifacts:
      - name: package.json
        pattern: package.json
-    #  - name: deploy.sh
-    #    pattern: scripts/deploy.sh  
      - name: scripts
        pattern: scripts/**
 
@@ -45,10 +45,9 @@ Sonar:
 
 ---
 version: 2
-# docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
 deployment:
-  name: Example Lambda
-  source-plan: GAASPIP-GSGELMRV2
+  name: Fitment Lambda
+  source-plan: GAASPIP-GSGFLV2A
   
 
 release-naming:
@@ -59,119 +58,56 @@ release-naming:
 
 environments:
   - Test
-  - Staging
-  # - Production
+  # - Staging
+  # - Prod
 
 
 Test:
   variables:
     gaas_deploy_stage: test
-  docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
+  docker:
+    image: node:10-slim
   tasks:
     - clean
     - artifact-download:
         destination: .
     - script:
-        - pwd
-        - ls -la
         - scripts/deploy.sh
   final-tasks:
     - script:
-      - echo "Clean up AWS credentials, send deploy status"
+      - echo "Final task"
+      - scripts/notifications.sh deploy
 
 
-Staging:
-  variables:
-    gaas_deploy_stage: test
-  docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
-  tasks:
-    - clean
-    - artifact-download:
-        destination: .
-    - script:
-        - pwd
-        - ls -la
-        - scripts/deploy.sh
-  final-tasks:
-    - script:
-      - echo "Clean up AWS credentials, send deploy status"
-
-
-# Production:
+# Staging:
 #   variables:
-#     gaas_deploy_stage: test
-#   docker: nexus.goodyear.eu:9000/gaas/base:1.0.1
+#     gaas_deploy_stage: prod
+#   docker:
+#     image: node:10-slim
 #   tasks:
 #     - clean
 #     - artifact-download:
-#         destination: /
+#         destination: .
 #     - script:
-#         - bash ./deploy.sh || ./slack.sh deploy
+#         - scripts/deploy.sh
 #   final-tasks:
 #     - script:
-#       - echo "Final task Test env"
-
-# # ---
-# # version: 2
-# # plan:
-# #   key: GSGELMR
-
-# # plan-permissions:
-# #   - users:
-# #       - voshchypko@intellias.com
-# #     permissions:
-# #       - view
-# #       - edit
-# #       - build
-# #       - admin
-# #       # - clone
+#       - echo "Final task"
+#       - scripts/notifications.sh deploy
 
 
-# # ---
-# # version: 2
-# # deployment:
-# #   name: Example Lambda
-# #   source-plan: GAASPIP-GSGELMR
-
-# # # deployment-permissions:
-# # #   - users:
-# # #       - voshchypko@intellias.com
-# # #       - oladnov@intellias.com
-# # #     permissions:
-# # #       - view
-# # #       - edit
-
-# # # default-environment-permissions:
-# # #   - users:
-# # #       - voshchypko@intellias.com
-# # #       - oladnov@intellias.com
-# # #     permissions:
-# # #       - view
-# # #       - edit
-# # #       - deploy
-
-# # environment-permissions:
-# #   - Test:
-# #       - users:
-# #           - voshchypko@intellias.com
-# #           - oladnov@intellias.com
-# #         permissions:
-# #           - view
-# #   - Staging:
-# #       - users:
-# #           - voshchypko@intellias.com
-# #           - oladnov@intellias.com
-# #         permissions:
-# #           - view
-# #           - edit
-# #   - Production:
-# #       - users:
-# #           - voshchypko@intellias.com
-# #           - oladnov@intellias.com
-# #         permissions:
-# #           - view
-# #           - edit
-# #           - deploy
-
-
-# # https://jira.atlassian.com/browse/BAM-20553?attachmentViewMode=gallery
+# Prod:
+#   variables:
+#     gaas_deploy_stage: prod
+#   docker:
+#     image: node:10-slim
+#   tasks:
+#     - clean
+#     - artifact-download:
+#         destination: .
+#     - script:
+#         - scripts/deploy.sh
+#   final-tasks:
+#     - script:
+#       - echo "Final task"
+#       - scripts/notifications.sh deploy

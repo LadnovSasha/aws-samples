@@ -2,45 +2,38 @@
 
 set -e
 
+
+id
+apt-get update
+apt-get install -y jq python-pip > /dev/null
+pip install awscli
+
+
 npm_pull_url="https://nexus.goodyear.eu/repository/gy-npm/"
-
-app_name=$(cat ./package.json | jq --raw-output '.name')
-app_version=$(cat ./package.json | jq --raw-output '.version')
-echo "Application name = ${app_name}"
-echo "Application version = ${app_version}"
-
-
 npmrc="${bamboo_build_working_directory}/.npmrc"
-echo "### npmrc => ${npmrc}"
+
+source "${bamboo_build_working_directory}/scripts/common.sh"
+
+get_app_info
 
 
-echo "NPM GENERATE CONFIG"
-echo "registry=${npm_pull_url}" > "${npmrc}"
-echo "_auth=${bamboo_nexus_npm_secret_token}" >> "${npmrc}"
-echo "strict-ssl=true" >> "${npmrc}"
-echo "always-auth=true" >> "${npmrc}"
-echo "email=gy@intellias.com" >> "${npmrc}"
-echo "unsafe-perm=true" >> "${npmrc}"
-echo "NPM END"
+set_npm_config \
+        -u "${npm_pull_url}" \
+        -t "${bamboo_nexus_npm_secret_token}" \
+        -p "${npmrc}"
 
 
 npm install download-npm-package
 node_modules/.bin/download-npm-package "${app_name}@${app_version}"
-npm config list
 
 
 npmrc="${bamboo_build_working_directory}/${app_name}/.npmrc"
-echo "### npmrc => ${npmrc}"
 
 
-echo "NPM GENERATE CONFIG"
-echo "registry=${npm_pull_url}" > "${npmrc}"
-echo "_auth=${bamboo_nexus_npm_secret_token}" >> "${npmrc}"
-echo "strict-ssl=true" >> "${npmrc}"
-echo "always-auth=true" >> "${npmrc}"
-echo "email=gy@intellias.com" >> "${npmrc}"
-echo "unsafe-perm=true" >> "${npmrc}"
-echo "NPM END"
+set_npm_config \
+        -u "${npm_pull_url}" \
+        -t "${bamboo_nexus_npm_secret_token}" \
+        -p "${npmrc}"
 
 
 cd ${app_name}
@@ -69,20 +62,20 @@ aws configure list
 aws sts get-caller-identity
 
 
+deploytime=$(date +%s)
 
-node_modules/.bin/serverless print \
+
+node_modules/.bin/serverless deploy \
                     --stage ${deploy_env} \
                     --salt=${serverless_salt} \
-                    --authorizerProviderArn="${authorizerproviderarn}" \
                     --vpcSecurityGroup="${vpcsecuritygroup}" \
-                    --dbSubnetGroup="${dbsubnetgroup}" \
-                    --nautilusBrowserApiKey="${nautilusbrowserapikey}" \
-                    --nautilusBookApiKey="${nautilusbookapikey}" \
-                    --commitHash="${bamboo_repository_revision_number}" \
-                    --deployTime="${functionStartTime}" \
-                    --version="${app_version}" \
                     --vpcSubnet="${vpcsubnet}" \
-
+                    --pg-user="${pg_user}" \
+                    --pg-password="${pg_password}" \
+                    --commitHash="${bamboo_repository_revision_number}" \
+                    --deployTime="${deploytime}" \
+                    --version="${app_version}" \
+                    --force
 
 
 aws --version
@@ -92,4 +85,4 @@ aws configure set default.region "REGION"
 aws configure list
 
 
-echo 1 > "${bamboo_build_working_directory}/result.txt"
+touch  "${result_file}"
