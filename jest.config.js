@@ -24,7 +24,10 @@ const jestConfig = {
     './src'
   ],
   collectCoverage: true,
-  collectCoverageFrom: ['src/**/*.{ts|js}'],
+  collectCoverageFrom: [
+    'src/**/*.ts',
+    'src/**/*.js'
+  ],
   coverageThreshold: {
     global: {
       lines: 1

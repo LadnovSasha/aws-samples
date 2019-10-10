@@ -1,4 +1,5 @@
 alertNotifications: ""
+vpc: ""
 Resources:
   requestBodyValidator:
     Type: 'AWS::ApiGateway::RequestValidator'

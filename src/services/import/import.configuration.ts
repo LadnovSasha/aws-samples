@@ -1,0 +1,163 @@
+import { ParseService } from 'lambda-core' ;
+
+export default [{
+    source: 'UniqueVehicle',
+    target: 'vehicleId',
+    format: ParseService.stringFormat,
+}, {
+    source: 'UniqueFitment',
+    target: 'fitment',
+    format: ParseService.stringFormat,
+}, {
+    source: 'HSNTSN',
+    target: 'hsntsn',
+    format: ParseService.stringFormat,
+}, {
+    source: 'VehicleManufacturer',
+    target: 'manufacturer',
+    format: ParseService.stringFormat,
+}, {
+    source: 'VehicleSegment',
+    target: 'segment',
+    format: ParseService.stringFormat,
+}, {
+    source: 'VehicleModel',
+    target: 'model',
+    format: ParseService.stringFormat,
+}, {
+    source: 'VehiclePlatform',
+    target: 'platform',
+    format: ParseService.stringFormat,
+}, {
+    source: 'StartOfBuildYear',
+    target: 'startBuildYear',
+    format: ParseService.numberFormat,
+}, {
+    source: 'StartOfBuildMonth',
+    target: 'startBuildMonth',
+    format: ParseService.numberFormat,
+}, {
+    source: 'EndOfBuildYear',
+    target: 'endBuildYear',
+    format: ParseService.numberFormatNull,
+}, {
+    source: 'EndOfBuildMonth',
+    target: 'endBuildMonth',
+    format: ParseService.numberFormatNull,
+}, {
+    source: 'Fuel',
+    target: 'fuel',
+    format: ParseService.stringFormat,
+}, {
+    source: 'Hubraum',
+    target: 'hubraum',
+    format: ParseService.numberFormatNull,
+}, {
+    source: 'EngineDescription',
+    target: 'engineDescription',
+    format: ParseService.stringFormat,
+}, {
+    source: 'EngineSizeInKW',
+    target: 'engineSizeKW',
+    format: ParseService.numberFormatNull,
+}, {
+    source: 'VehicleFormat',
+    target: 'format',
+    format: ParseService.stringFormat,
+}, {
+    source: 'NormalPressureFront',
+    target: 'normalPressureFront',
+    format: ParseService.numberFormat,
+}, {
+    source: 'HighwayPressureFront',
+    target: 'highwayPressureFront',
+    format: ParseService.numberFormat,
+}, {
+    source: 'NormalPressureRear',
+    target: 'normalPressureRear',
+    format: ParseService.numberFormat,
+}, {
+    source: 'HighwayPressureRear',
+    target: 'highwayPressureRear',
+    format: ParseService.numberFormat,
+}, {
+    source: 'TypeOfFitment',
+    target: 'fitmentType',
+    format: ParseService.stringFormat,
+}, {
+    source: 'TirePressureMonitoringsystem',
+    target: 'pressureMonitoringSystem',
+    format: ParseService.numberFormat,
+}, {
+    source: 'FrontWidth',
+    target: 'frontWidth',
+    format: ParseService.numberFormat,
+}, {
+    source: 'FrontHeight',
+    target: 'frontHeight',
+    format: ParseService.numberFormat,
+}, {
+    source: 'FrontRim',
+    target: 'frontRim',
+    format: ParseService.numberFormat,
+}, {
+    source: 'FrontLoadindex',
+    target: 'frontLoadIndex',
+    format: ParseService.stringFormat,
+}, {
+    source: 'FrontSpeedIndex',
+    target: 'frontSpeedIndex',
+    format: ParseService.stringFormat,
+}, {
+    source: 'FrontOriginalEquipment',
+    target: 'frontOriginalEquipment',
+    format: ParseService.stringFormat,
+}, {
+    source: 'RearWidth',
+    target: 'rearWidth',
+    format: ParseService.numberFormat,
+}, {
+    source: 'RearHeight',
+    target: 'rearHeight',
+    format: ParseService.numberFormat,
+}, {
+    source: 'RearRim',
+    target: 'rearRim',
+    format: ParseService.numberFormat,
+}, {
+    source: 'RearLoadindex',
+    target: 'rearLoadindex',
+    format: ParseService.stringFormat,
+}, {
+    source: 'RearSpeedIndex',
+    target: 'rearSpeedIndex',
+    format: ParseService.stringFormat,
+}, {
+    source: 'RearOriginalEquipment',
+    target: 'rearOriginalEquipment',
+    format: ParseService.stringFormat,
+}, {
+    source: 'ImageName',
+    target: 'imageName',
+    format: ParseService.stringFormat,
+}, {
+    source: 'VehicleBodyCategory',
+    target: 'vehicleBodyCategory',
+    format: ParseService.stringFormat,
+}, {
+    source: 'MaxSpeed',
+    target: 'maxSpeed',
+    format: ParseService.numberFormat,
+}, {
+    source: 'Weight',
+    target: 'weight',
+    format: ParseService.numberFormat,
+}, {
+    source: 'AxleLoadFront',
+    target: 'axleLoadFront',
+    format: ParseService.numberFormat,
+}, {
+    source: 'AxleLoadRear',
+    target: 'axleLoadRear',
+    format: ParseService.numberFormat,
+}];

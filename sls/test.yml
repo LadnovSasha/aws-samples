@@ -1,7 +1,36 @@
 vpc: ""
 alertNotifications: ""
 Resources:
-
+  S3BucketImport:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: ${self:provider.environment.BUCKET}
+      MetricsConfigurations:
+        - Id: EntireBucket
+  ImportFitmentsPermissionImportS3:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        "Fn::GetAtt":
+          - ImportFitmentsLambdaFunction
+          - Arn
+      Principal: "s3.amazonaws.com"
+      Action: "lambda:InvokeFunction"
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn: "arn:aws:s3:::${self:provider.environment.BUCKET}"
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 20
+      BackupRetentionPeriod: 0
+      DBInstanceClass: db.t2.micro
+      DBInstanceIdentifier: ${self:provider.environment.DB_IDENTIFIER}
+      MasterUsername: ${opt:pg-user, "developer"}
+      MasterUserPassword: ${opt:pg-password, "developerSuperPWD"}
+      DBName: fitment
+      Engine: postgres
   SNSTopic: ${file(./sls/monitoring.yml):SNSTopic}
 
   ApiGateway4XXError: ${file(./sls/monitoring.yml):ApiGateway4XXError}

@@ -1,7 +1,7 @@
 service: fitment-lambda
 provider:
   name: aws
-  runtime: nodejs8.10
+  runtime: nodejs10.x
   region: eu-central-1
   stage: stage
   timeout: 20
@@ -11,6 +11,17 @@ provider:
     VERSION: ${opt:version, '1.0'}
     COMMIT_HASH: ${opt:commitHash, 'latest'}
     DEPLOY_TIME: ${opt:deployTime, ''}
+    DB_IDENTIFIER: ${opt:stage, self:provider.stage}-fitment-encrypted-${opt:salt, "local"}
+    BUCKET: ${opt:stage, self:provider.stage}-fitment-import-${opt:salt, "local"}
+    DATABASE_URL:
+      "Fn::Join":
+      - ""
+      -
+        - "postgres://${opt:pg-user, 'developer'}:${opt:pg-password, 'developerSuperPWD'}@"
+        - "Fn::GetAtt": [DBInstance, Endpoint.Address]
+        - ":"
+        - "Fn::GetAtt": [DBInstance, Endpoint.Port]
+        - "/fitment"
   tracing: true # enable tracing
   usagePlan: {}
   iamRoleStatements:
@@ -41,10 +52,30 @@ package:
   excludeDevDependencies: true
   include:
   - src/**/!(*.spec).js
+  - migrations/**/*
+  - _warmup/index.js  # HACK! Typescript requires lambda handler files to be with extension *.ts.
+                      # Here overriding _warmup/index.js  to the .build dir
   exclude:
   - src/**/*.ts
 
 functions:
+  up:
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    handler: src/migrations/handler.up
+    timeout: 30
+    environment:
+      DATABASE_URL: '${self:provider.environment.DATABASE_URL}'
+    warmup:
+      enabled: false
+
+  down:
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    handler: src/migrations/handler.down
+    timeout: 30
+    environment:
+      DATABASE_URL: '${self:provider.environment.DATABASE_URL}'
+    warmup:
+      enabled: false
   healthStatus:
     handler: src/health/status/handler.status
     description: Test handler
@@ -63,7 +94,17 @@ functions:
             description: Returned when the operation is completed successfully.
             responseModels:
               "application/json": HealthStatusResponse
-
+  importFitments:
+    handler: src/import/handler.importFitments
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    events:
+    - s3:
+        bucket: Import
+        event: s3:ObjectCreated:*
+        rules:
+          - prefix: import/
+    warmup:
+      enabled: false
 custom:
   warmup:
     cleanFolder: false

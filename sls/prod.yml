@@ -7,6 +7,36 @@ vpc:
             - ${opt:vpcSubnet}
 alertNotifications: ${file(node_modules/lambda-core/sls/alarms.yml):prodAlertNotifications}
 Resources:
+  S3BucketImport:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: Private
+      BucketName: ${self:provider.environment.BUCKET}
+      MetricsConfigurations:
+        - Id: EntireBucket
+  ImportFitmentsPermissionImportS3:
+    Type: "AWS::Lambda::Permission"
+    Properties:
+      FunctionName:
+        "Fn::GetAtt":
+          - ImportFitmentsLambdaFunction
+          - Arn
+      Principal: "s3.amazonaws.com"
+      Action: "lambda:InvokeFunction"
+      SourceAccount:
+        Ref: AWS::AccountId
+      SourceArn: "arn:aws:s3:::${self:provider.environment.BUCKET}"
+  DBInstance:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      AllocatedStorage: 20
+      BackupRetentionPeriod: 0
+      DBInstanceClass: db.t3.medium
+      DBInstanceIdentifier: ${self:provider.environment.DB_IDENTIFIER}
+      MasterUsername: ${opt:pg-user}
+      MasterUserPassword: ${opt:pg-password}
+      DBName: fitment
+      Engine: postgres
   requestBodyValidator:
     Type: 'AWS::ApiGateway::RequestValidator'
     Properties:
