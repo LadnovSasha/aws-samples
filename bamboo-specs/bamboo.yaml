@@ -111,3 +111,24 @@ Test:
 #     - script:
 #       - echo "Final task"
 #       - scripts/notifications.sh deploy
+
+---
+version: 2
+deployment:
+  name: Fitment Lambda
+
+deployment-permissions:
+  - users:
+      - oladnov@intellias.com
+    permissions:
+      - view
+      - deploy
+
+environment-permissions:
+  - Test:
+      - users:
+          - oladnov@intellias.com
+        permissions:
+          - view
+          - edit
+          - deploy
