@@ -54,4 +54,4 @@ customDomain:
   hostedZoneId: Z1U9ULNL0V5AJ3
   stage: '${opt:stage, self:provider.stage}'
   createRoute53Record: true
-  enabled: false
+  enabled: true
