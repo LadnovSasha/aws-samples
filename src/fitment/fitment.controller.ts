@@ -1,6 +1,6 @@
 import { Controller, Resource } from 'lambda-core';
-const manufacturers = require('../../mock/manufacturers.json');
-const vehicles = require('../../mock/vehicles.json');
+const manufacturers = require('../../mock/manufacturersMock.json');
+const vehicles = require('../../mock/vehiclesMock.json');
 
 export class FitmentController extends Controller {
     @Resource()
