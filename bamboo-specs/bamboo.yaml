@@ -122,7 +122,6 @@ deployment-permissions:
       - oladnov@intellias.com
     permissions:
       - view
-      - deploy
 
 environment-permissions:
   - Test:
