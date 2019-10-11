@@ -6,6 +6,7 @@ vpc:
             - ","
             - ${opt:vpcSubnet}
 alertNotifications: ${file(node_modules/lambda-core/sls/alarms.yml):prodAlertNotifications}
+endpointIsPrivate: true
 Resources:
   S3BucketImport:
     Type: AWS::S3::Bucket
@@ -53,6 +54,14 @@ Resources:
         Ref: ApiGatewayRestApi
       ValidateRequestBody: false
       ValidateRequestParameters: true
+  FitmentSizeLambdaNautilusUsagePlanKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    DependsOn: ApiGatewayUsagePlan
+    Properties :
+      KeyId: ${opt:nautilusBrowserApiKey}
+      KeyType: API_KEY
+      UsagePlanId:
+        Ref: ApiGatewayUsagePlan
 
   SNSTopic: ${file(./sls/monitoring.yml):SNSTopic}
 

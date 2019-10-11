@@ -1,5 +1,6 @@
 vpc: ""
 alertNotifications: ""
+endpointIsPrivate: true
 Resources:
   S3BucketImport:
     Type: AWS::S3::Bucket
@@ -31,6 +32,14 @@ Resources:
       MasterUserPassword: ${opt:pg-password, "developerSuperPWD"}
       DBName: fitment
       Engine: postgres
+  FitmentLambdaNautilusUsagePlanKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    DependsOn: ApiGatewayUsagePlan
+    Properties :
+      KeyId: ${opt:nautilusBrowserApiKey, 'm5vmux7nci'}
+      KeyType: API_KEY
+      UsagePlanId:
+        Ref: ApiGatewayUsagePlan
   SNSTopic: ${file(./sls/monitoring.yml):SNSTopic}
 
   ApiGateway4XXError: ${file(./sls/monitoring.yml):ApiGateway4XXError}

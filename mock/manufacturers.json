@@ -1,0 +1,17 @@
+[
+    {
+      "id": "audi",
+      "name": "Audi",
+      "logoUrl": "https://s3.amazon.aws/audi"
+    },
+    {
+      "id": "alfa_romeo",
+      "name": "Alfa Romeo",
+      "logoUrl": "https://s3.amazon.aws/bmw"
+    },
+    {
+      "id": "volkswagen",
+      "name": "Volkswagen",
+      "logoUrl": "https://s3.amazon.aws/vw"
+    }
+  ]

@@ -1,5 +1,6 @@
 vpc: ""
 alertNotifications: ""
+endpointIsPrivate: false
 Resources:
   S3BucketImport:
     Type: AWS::S3::Bucket

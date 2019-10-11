@@ -13,7 +13,8 @@ module.exports = {
     `)).then(() => migration.sequelize.query(`
         CREATE TABLE manufacturers (
             key varchar(50) PRIMARY KEY,
-            name jsonb
+            name jsonb,
+            logo varchar(50)
         );
     `)).then(() => migration.sequelize.query(`
         CREATE TABLE tires (

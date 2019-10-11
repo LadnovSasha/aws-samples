@@ -53,6 +53,7 @@ package:
   include:
   - src/**/!(*.spec).js
   - migrations/**/*
+  - mock/**/*
   - _warmup/index.js  # HACK! Typescript requires lambda handler files to be with extension *.ts.
                       # Here overriding _warmup/index.js  to the .build dir
   exclude:
@@ -105,6 +106,120 @@ functions:
           - prefix: import/
     warmup:
       enabled: false
+  getManufacturers:
+    handler: src/fitment/handler.getManufacturers
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    events:
+    - http:
+        path: ${self:provider.environment.API_VERSION}/{country}/car
+        method: get
+        cors: true
+        private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
+        documentation:
+          summary: Returns the result of a quick health status of the API.
+          description: Returns the result of a quick health status of the API.
+          tags:
+          - Health
+          methodResponses:
+          - statusCode: '200'
+            description: Returned when the operation is completed successfully.
+            responseModels:
+              "application/json": HealthStatusResponse
+  getCarByMake:
+    handler: src/fitment/handler.getCarByMake
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
+    events:
+    - http:
+        path: ${self:provider.environment.API_VERSION}/{country}/car/make/{make}
+        method: get
+        cors: true
+        documentation:
+          summary: Returns the result of a quick health status of the API.
+          description: Returns the result of a quick health status of the API.
+          tags:
+          - Health
+          methodResponses:
+          - statusCode: '200'
+            description: Returned when the operation is completed successfully.
+            responseModels:
+              "application/json": HealthStatusResponse
+  getCarById:
+    handler: src/fitment/handler.getCarById
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
+    events:
+    - http:
+        path: ${self:provider.environment.API_VERSION}/{country}/car/{vehicleId}
+        method: get
+        cors: true
+        documentation:
+          summary: Returns the result of a quick health status of the API.
+          description: Returns the result of a quick health status of the API.
+          tags:
+          - Health
+          methodResponses:
+          - statusCode: '200'
+            description: Returned when the operation is completed successfully.
+            responseModels:
+              "application/json": HealthStatusResponse
+  getCarByHsnTsn:
+    handler: src/fitment/handler.getCarByHsnTsn
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
+    events:
+    - http:
+        path: ${self:provider.environment.API_VERSION}/{country}/car/{hsn}/{tsn}
+        method: get
+        cors: true
+        documentation:
+          summary: Returns the result of a quick health status of the API.
+          description: Returns the result of a quick health status of the API.
+          tags:
+          - Health
+          methodResponses:
+          - statusCode: '200'
+            description: Returned when the operation is completed successfully.
+            responseModels:
+              "application/json": HealthStatusResponse
+  getOriginalManufacturers:
+    handler: src/fitment/handler.getOriginalManufacturers
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
+    events:
+    - http:
+        path: ${self:provider.environment.API_VERSION}/{country}/car/oem
+        method: get
+        cors: true
+        documentation:
+          summary: Returns the result of a quick health status of the API.
+          description: Returns the result of a quick health status of the API.
+          tags:
+          - Health
+          methodResponses:
+          - statusCode: '200'
+            description: Returned when the operation is completed successfully.
+            responseModels:
+              "application/json": HealthStatusResponse
+  getCarByOriginalEquipmentMake:
+    handler: src/fitment/handler.getCarByOriginalEquipmentMake
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
+    events:
+    - http:
+        path: ${self:provider.environment.API_VERSION}/{country}/car/oem/{make}
+        method: get
+        cors: true
+        documentation:
+          summary: Returns the result of a quick health status of the API.
+          description: Returns the result of a quick health status of the API.
+          tags:
+          - Health
+          methodResponses:
+          - statusCode: '200'
+            description: Returned when the operation is completed successfully.
+            responseModels:
+              "application/json": HealthStatusResponse
 custom:
   warmup:
     cleanFolder: false

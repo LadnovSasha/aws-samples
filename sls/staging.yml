@@ -7,6 +7,7 @@ vpc:
             - ${opt:vpcSubnet, 'subnet-0bae2aff6ea3346ac,subnet-0cfc5c84e690e4875'}
 
 alertNotifications: ${file(node_modules/lambda-core/sls/alarms.yml):stagingAlertNotifications}
+endpointIsPrivate: true
 Resources:
   S3BucketImport:
     Type: AWS::S3::Bucket
@@ -38,6 +39,14 @@ Resources:
       MasterUserPassword: ${opt:pg-password, "developerSuperPWD"}
       DBName: fitment
       Engine: postgres
+  FitmentSizeLambdaNautilusUsagePlanKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    DependsOn: ApiGatewayUsagePlan
+    Properties :
+      KeyId: ${opt:nautilusBrowserApiKey, '6u5a0pr3p5'}
+      KeyType: API_KEY
+      UsagePlanId:
+        Ref: ApiGatewayUsagePlan
   requestBodyValidator:
     Type: 'AWS::ApiGateway::RequestValidator'
     Properties:

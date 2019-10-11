@@ -15,25 +15,26 @@ export class MapService {
     @Injectable()
     protected async queryManufacturer(
         key: string,
+        logo: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<string> {
-        const normalized = transliterate(key).toLowerCase();
+        const normalized = transliterate(key).replace(/\s/g, '_').toLowerCase();
         const { rows } = await db!.query(`Select key from ${this.manufacturersTable} where key='${normalized}' AND name ? '${this.locale}'`);
 
         if (!rows.length) {
             await db!.query(`
-                INSERT INTO ${this.manufacturersTable} (key, name)
-                VALUES ($1, $2)
+                INSERT INTO ${this.manufacturersTable} (key, name, logo)
+                VALUES ($1, $2, $3)
                 ON CONFLICT (key) DO UPDATE SET
-                    name = manufacturers.name || $2;
-
-            `, [normalized, JSON.stringify({ [this.locale]: key })]);
+                    name = manufacturers.name || excluded.name,
+                    logo = excluded.logo;
+            `, [normalized, JSON.stringify({ [this.locale]: key }), logo]);
         }
 
         return normalized;
     }
 
-    async checkAndGetManufacturer(key: string): Promise<string> {
+    async checkAndGetManufacturer(key: string, logo: string): Promise<string> {
         const normalized = transliterate(key).toLowerCase();
         const cacheKey = `${normalized}_${this.locale}`;
 
@@ -41,7 +42,7 @@ export class MapService {
             return await manufacturersCache.get(cacheKey);
         }
 
-        const promise = this.queryManufacturer(key);
+        const promise = this.queryManufacturer(key, logo);
         manufacturersCache.set(cacheKey, promise);
 
         return await promise;
@@ -53,7 +54,7 @@ export class MapService {
             hsntsn: raw.hsntsn,
             countries: [this.country],
             model: raw.model,
-            manufacturer: await this.checkAndGetManufacturer(raw.manufacturer),
+            manufacturer: await this.checkAndGetManufacturer(raw.manufacturer, raw.imageName),
             platform: raw.platform,
             startBuildYear: raw.startBuildYear,
             startBuildMonth: raw.startBuildMonth,

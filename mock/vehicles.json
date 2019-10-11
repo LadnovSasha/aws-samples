@@ -1,0 +1,239 @@
+[
+    {
+      "id": "P00000100000016",
+      "model": "Alfa 145/146",
+      "manufacturer": {
+        "id": "alfa_romeo",
+        "name": "Alfa Romeo",
+        "description": "",
+        "logoUrl": "https://amazon.com/s3/alfa_romeo"
+      },
+      "platform": "Kompaktklasse",
+      "hsntsn": [
+        {
+          "hsn": "4001 150,4136",
+          "tsn": "320,4136 340"
+        }
+      ],
+      "tpms": true,
+      "segment": "Kompaktklasse",
+      "bodyCategory": "Hatchback",
+      "from": {
+        "month": 1,
+        "year": 1997
+      },
+      "to": {
+        "month": 7,
+        "year": 2004
+      },
+      "energyType": {
+        "id": "petrol",
+        "name": "Benzin"
+      },
+      "engine": {
+        "cubicCapacity": "1595",
+        "description": "Alfa romeo 1.6(75 KW, 102 HP)",
+        "size": {
+          "kw": "75",
+          "ps": "102"
+        }
+      },
+      "maxSpeed": {
+        "km": 184,
+        "mph": 114
+      },
+      "weight": 1830,
+      "axleLoad": {
+        "front": 1000,
+        "rear": 900
+      },
+      "fitments": [
+        {
+          "frontDimension": {
+            "sizeMM": 235,
+            "aspectRatio": 65,
+            "rim": 17,
+            "speedIndex": "string",
+            "loadIndex": 82,
+            "loadIndex2": 165,
+            "normalPressure": 2.2,
+            "highwayPressure": 2.4,
+            "materials": [
+              {
+                "code": "521234",
+                "speedIndex": "Y",
+                "loadIndex": 98,
+                "loadIndex2": 98,
+                "isOE": true,
+                "oe": {
+                  "from": {
+                    "month": 1,
+                    "year": 2010
+                  },
+                  "to": {
+                    "month": 4,
+                    "year": 2012
+                  }
+                }
+              }, {
+                "code": "123453",
+                "speedIndex": "Y",
+                "loadIndex": 98,
+                "loadIndex2": 98,
+                "isOE": false,
+                "oe": {
+                  "from": {
+                    "month": 1,
+                    "year": 2010
+                  },
+                  "to": {
+                    "month": 4,
+                    "year": 2012
+                  }
+                }
+              }
+            ]
+          },
+          "rearDimension": {
+            "sizeMM": 235,
+            "aspectRatio": 65,
+            "rim": 17,
+            "speedIndex": 82,
+            "loadIndex": 82,
+            "loadIndex2": 190,
+            "normalPressure": 2.2,
+            "highwayPressure": 2.6,
+            "materials": [
+                {
+                    "code": "521234",
+                    "speedIndex": "Y",
+                    "loadIndex": 98,
+                    "loadIndex2": 98,
+                    "isOE": true,
+                    "oe": {
+                        "from": {
+                            "month": 1,
+                            "year": 2010
+                        },
+                        "to": {
+                            "month": 4,
+                            "year": 2012
+                        }
+                    }
+                }
+            ]
+          }
+        }
+      ]
+    }, {
+        "id": "P00000100000022",
+        "model": "Golf",
+        "manufacturer": {
+          "id": "volkswagen",
+          "name": "Volkswagen",
+          "description": "",
+          "logoUrl": "https://amazon.com/s3/volkswagen"
+        },
+        "platform": "Kompaktklasse",
+        "hsntsn": [
+          {
+            "hsn": "4001 150,4136",
+            "tsn": "320,4136 340"
+          }
+        ],
+        "tpms": true,
+        "segment": "Kompaktklasse",
+        "bodyCategory": "Hatchback",
+        "from": {
+          "month": 1,
+          "year": 1997
+        },
+        "to": {
+          "month": 7,
+          "year": 2004
+        },
+        "energyType": {
+          "id": "petrol",
+          "name": "Benzin"
+        },
+        "engine": {
+          "cubicCapacity": "1595",
+          "description": "Golf 1.6(75 KW, 102 HP)",
+          "size": {
+            "kw": "75",
+            "ps": "102"
+          }
+        },
+        "maxSpeed": {
+          "km": 184,
+          "mph": 114
+        },
+        "weight": 1830,
+        "axleLoad": {
+          "front": 1000,
+          "rear": 900
+        },
+        "fitments": [
+          {
+            "frontDimension": {
+              "sizeMM": 235,
+              "aspectRatio": 65,
+              "rim": 17,
+              "speedIndex": "string",
+              "loadIndex": 82,
+              "loadIndex2": 165,
+              "normalPressure": 2.2,
+              "highwayPressure": 2.4,
+              "materials": [
+                {
+                  "code": "521234",
+                  "speedIndex": "Y",
+                  "loadIndex": 98,
+                  "loadIndex2": 98,
+                  "isOE": true,
+                  "oe": {
+                    "from": {
+                      "month": 1,
+                      "year": 2010
+                    },
+                    "to": {
+                      "month": 4,
+                      "year": 2012
+                    }
+                  }
+                }
+              ]
+            },
+            "rearDimension": {
+              "sizeMM": 235,
+              "aspectRatio": 65,
+              "rim": 17,
+              "speedIndex": 82,
+              "loadIndex": 82,
+              "loadIndex2": 190,
+              "normalPressure": 2.2,
+              "highwayPressure": 2.6,
+              "materials": [
+                  {
+                      "code": "521234",
+                      "speedIndex": "Y",
+                      "loadIndex": 98,
+                      "loadIndex2": 98,
+                      "isOE": true,
+                      "oe": {
+                          "from": {
+                              "month": 1,
+                              "year": 2010
+                          },
+                          "to": {
+                              "month": 4,
+                              "year": 2012
+                          }
+                      }
+                  }
+              ]
+            }
+          }
+        ]
+      }
+  ]
