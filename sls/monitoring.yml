@@ -3,8 +3,8 @@
 SNSTopic:
   Type: AWS::SNS::Topic
   Properties:
-    DisplayName: "example-stack-alarms"
-    TopicName: "example-stack-alarms"
+    DisplayName: "fitment-stack-alarms"
+    TopicName: "fitment-stack-alarms"
     Subscription:
       -
         Protocol: "lambda"
@@ -24,11 +24,11 @@ ApiGateway4XXError:
       AlarmActions:
         - !Ref SNSTopic
       AlarmName:
-        Fn::Join: [ "-", [ "ApiGateway", "example", "4XXError" ] ]
+        Fn::Join: [ "-", [ "ApiGateway", "fitment", "4XXError" ] ]
       ComparisonOperator: "GreaterThanThreshold"
       Dimensions:
         - Name: ApiName
-          Value: ${opt:stage, self:provider.stage}-example-lambda
+          Value: ${opt:stage, self:provider.stage}-fitment-lambda
       EvaluationPeriods: 1
       MetricName: "4XXError"
       Namespace: "AWS/ApiGateway"
@@ -44,11 +44,11 @@ ApiGateway5XXError:
       AlarmActions:
         - !Ref SNSTopic
       AlarmName:
-        Fn::Join: [ "-", [ "ApiGateway", "example", "5XXError" ] ]
+        Fn::Join: [ "-", [ "ApiGateway", "fitment", "5XXError" ] ]
       ComparisonOperator: "GreaterThanThreshold"
       Dimensions:
         - Name: ApiName
-          Value: ${opt:stage, self:provider.stage}-example-lambda
+          Value: ${opt:stage, self:provider.stage}-fitment-lambda
       EvaluationPeriods: 1
       MetricName: "5XXError"
       Namespace: "AWS/ApiGateway"
@@ -64,11 +64,11 @@ ApiGatewayLatency:
       AlarmActions:
         - !Ref SNSTopic
       AlarmName:
-        Fn::Join: [ "-", [ "ApiGateway", "example", "Latency" ] ]
+        Fn::Join: [ "-", [ "ApiGateway", "fitment", "Latency" ] ]
       ComparisonOperator: "GreaterThanThreshold"
       Dimensions:
         - Name: ApiName
-          Value: ${opt:stage, self:provider.stage}-example-lambda
+          Value: ${opt:stage, self:provider.stage}-fitment-lambda
       EvaluationPeriods: 1
       MetricName: "Latency"
       Namespace: "AWS/ApiGateway"
@@ -85,7 +85,7 @@ s3bucket4xxErrors:
       AlarmActions:
         - !Ref SNSTopic
       AlarmName:
-        Fn::Join: [ "-", [ "s3", "example", "4XXError" ] ]
+        Fn::Join: [ "-", [ "s3", "fitment", "4XXError" ] ]
       ComparisonOperator: "GreaterThanThreshold"
       Dimensions:
         - Name: BucketName
@@ -107,7 +107,7 @@ s3bucket5xxErrors:
       AlarmActions:
         - !Ref SNSTopic
       AlarmName:
-        Fn::Join: [ "-", [ "s3", "example", "5XXError" ] ]
+        Fn::Join: [ "-", [ "s3", "fitment", "5XXError" ] ]
       ComparisonOperator: "GreaterThanThreshold"
       Dimensions:
         - Name: BucketName
@@ -129,7 +129,7 @@ s3bucketTotalRequestLatency:
       AlarmActions:
         - !Ref SNSTopic
       AlarmName:
-        Fn::Join: [ "-", [ "s3", "example", "TotalRequestLatency" ] ]
+        Fn::Join: [ "-", [ "s3", "fitment", "TotalRequestLatency" ] ]
       ComparisonOperator: "GreaterThanThreshold"
       Dimensions:
         - Name: BucketName

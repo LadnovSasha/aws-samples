@@ -35,13 +35,13 @@ describe('src/services/import/import.service', () => {
         const instance: any = new MapService('de_de');
 
         it('Should create manufacturer if none is present', async () => {
-            await instance.queryManufacturer('Alfa');
+            await instance.queryManufacturer('Alfa', 'logoUrl');
             const [selectQuery] = db.query.getCall(0).args;
             const [insertQuery, values] = db.query.getCall(1).args;
 
             expect(selectQuery).toEqual("Select key from manufacturers where key='alfa' AND name ? 'de_de'");
-            expect(insertQuery.trim()).toMatch(/^INSERT INTO manufacturers \(key, name\)/);
-            expect(values).toEqual(['alfa', JSON.stringify({ de_de: 'Alfa' })]);
+            expect(insertQuery.trim()).toMatch(/^INSERT INTO manufacturers \(key, name, logo\)/);
+            expect(values).toEqual(['alfa', JSON.stringify({ de_de: 'Alfa' }), 'logoUrl']);
         });
     });
 
