@@ -64,9 +64,13 @@ export class FitmentController extends Controller {
         );
     }
 
+    @Injectable()
     @Resource()
-    async getCarByOriginalEquipmentMake() {
+    async getCarByOriginalEquipmentMake(
+        @Inject('MockService', { name: 'mock/vehicles.json' }) mock?: MockService,
+    ) {
         const { make } = this.getPathParams();
+        const vehicles = await mock!.getAll();
         const filteredVehicles = vehicles.filter((x: any) => x.manufacturer.id === make);
 
         const matchedVehicles = filteredVehicles.reduce((vehicleAcc: any, vehicle: any) => {
