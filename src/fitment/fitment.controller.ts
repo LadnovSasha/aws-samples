@@ -1,25 +1,37 @@
-import { Controller, Resource } from 'lambda-core';
-const manufacturers = require('../../mock/manufacturersMock.json');
-const vehicles = require('../../mock/vehiclesMock.json');
+import {
+    Controller, Resource, Injectable,
+    Inject, MockService,
+} from 'lambda-core';
 
 export class FitmentController extends Controller {
+    @Injectable()
     @Resource()
-    async getManufacturers() {
+    async getManufacturers(
+        @Inject('MockService', { name: 'mock/manufacturers.json' }) mock?: MockService,
+    ) {
         return this.getResponse().ok(
-            manufacturers,
+            await mock!.getAll(),
         );
     }
 
+    @Injectable()
     @Resource()
-    async getCarByMake() {
+    async getCarByMake(
+        @Inject('MockService', { name: 'mock/vehicles.json' }) mock?: MockService,
+    ) {
         const { make } = this.getPathParams();
+        const vehicles = await mock!.getAll();
         const matchedVehicles = vehicles.filter((x: any) => x.manufacturer.id === make);
         return this.getResponse().ok(matchedVehicles);
     }
 
+    @Injectable()
     @Resource()
-    async getCarById() {
+    async getCarById(
+        @Inject('MockService', { name: 'mock/vehicles.json' }) mock?: MockService,
+    ) {
         const { vehicleId } = this.getPathParams();
+        const vehicles = await mock!.getAll();
         const matchedVehicle = vehicles.find((x: any) => x.id === vehicleId);
         if (!matchedVehicle) {
             return this.getResponse().notFound('Vehicle not found');
@@ -27,9 +39,13 @@ export class FitmentController extends Controller {
         return this.getResponse().ok(matchedVehicle);
     }
 
+    @Injectable()
     @Resource()
-    async getCarByHsnTsn() {
+    async getCarByHsnTsn(
+        @Inject('MockService', { name: 'mock/vehicles.json' }) mock?: MockService,
+    ) {
         const { hsn, tsn } = this.getPathParams();
+        const vehicles = await mock!.getAll();
         const matchedVehicles = vehicles.filter((x: any) => {
             const hsntsnArray = x.hsntsn.map((z: any) => `${z.hsn}${z.tsn}`);
             return hsntsnArray.includes(`${hsn}${tsn}`);
@@ -37,8 +53,12 @@ export class FitmentController extends Controller {
         return this.getResponse().ok(matchedVehicles);
     }
 
+    @Injectable()
     @Resource()
-    async getOriginalManufacturers() {
+    async getOriginalManufacturers(
+        @Inject('MockService', { name: 'mock/manufacturers.json' }) mock?: MockService,
+    ) {
+        const manufacturers = await mock!.getAll();
         return this.getResponse().ok(
             manufacturers.filter((x: any) => x.id === 'volkswagen'),
         );
