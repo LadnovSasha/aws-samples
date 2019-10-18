@@ -34,7 +34,7 @@ module.exports = {
     `)).then(() => migration.sequelize.query(`
         CREATE TABLE vehicles (
             id varchar(50) PRIMARY KEY,
-            hsntsn varchar(50),
+            hsntsn text[],
             countries text[],
             model varchar(50),
             manufacturer varchar(50) REFERENCES manufacturers(key) ON UPDATE CASCADE,

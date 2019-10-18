@@ -70,11 +70,13 @@ describe('src/services/import/import.service', () => {
                 vehicleId: 'test',
                 fuel: 'fuel',
                 hubraum: 1,
+                hsntsn: '320 150',
             });
 
             expect(result.id).toEqual('test');
             expect(result.countries).toEqual(['de']);
             expect(result.fuel).toEqual({ de_de: 'fuel' });
+            expect(result.hsntsn).toEqual([[320, 150]]);
         });
     });
 

@@ -48,10 +48,19 @@ export class MapService {
         return await promise;
     }
 
+    unmarshalHsnTsn(raw: string) {
+        return raw.split(',').map((row: string) => {
+            const hsntsn = row
+                .split(' ')
+                .map(x => Number.parseInt(x, 10));
+            return hsntsn;
+        });
+    }
+
     async unmarshalVehicle(raw: IImportFitment): Promise<IVehicle> {
         return {
             id: raw.vehicleId,
-            hsntsn: raw.hsntsn,
+            hsntsn: this.unmarshalHsnTsn(raw.hsntsn),
             countries: [this.country],
             model: raw.model,
             manufacturer: await this.checkAndGetManufacturer(raw.manufacturer, raw.imageName),

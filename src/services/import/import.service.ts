@@ -72,6 +72,7 @@ export class ImportService {
             .into(this.vehicleTable)
             .setFields({
                 ...vehicle,
+                hsntsn: this.marshalMultidimArray(vehicle.hsntsn),
                 countries: `{${mapService.country}}`,
                 fuel: JSON.stringify(vehicle.fuel),
                 engineDescription: JSON.stringify(vehicle.engineDescription),
@@ -87,6 +88,12 @@ export class ImportService {
         const fileNameWithExtension = fileName.split('/').pop() || fileName;
         const name = fileNameWithExtension.split('.')[0];
         return name.replace('GDY_', '').toLowerCase();
+    }
+
+    protected marshalMultidimArray<T>(arr: T[][]): string {
+        const plainArray = arr.map(x => `"${x.join(',')}"`);
+
+        return `{${plainArray.join(',')}}`;
     }
 
     @Injectable()
