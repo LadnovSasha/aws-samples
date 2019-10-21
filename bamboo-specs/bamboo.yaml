@@ -33,6 +33,8 @@ Build:
        pattern: package.json
      - name: scripts
        pattern: scripts/**
+     - name: migrations
+       pattern: migrations/**
 
 
 Sonar:
