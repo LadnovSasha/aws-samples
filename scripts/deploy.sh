@@ -40,6 +40,8 @@ cd ${app_name}
 npm install
 rm -f "${npmrc}"
 
+ls -la
+[ -d migrations ] && ls -la migrations
 
 echo "### Bamboo Deployment Env -> ${bamboo_deploy_environment}"
 rm -f "${npmrc}"
