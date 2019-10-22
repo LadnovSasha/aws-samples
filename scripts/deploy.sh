@@ -42,7 +42,7 @@ rm -f "${npmrc}"
 
 ls -la
 
-migration="${bamboo_build_working_directory}/migrations"
+migration="${bamboo_build_working_directory}/${app_name}/migrations"
 
 if [ -d "${migrations}" ]; then
 
