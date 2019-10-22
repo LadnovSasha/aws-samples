@@ -41,7 +41,17 @@ npm install
 rm -f "${npmrc}"
 
 ls -la
-[ -d migrations ] && ls -la migrations
+
+migration="${bamboo_build_working_directory}/migrations"
+
+if [ -d "${migrations}" ]; then
+
+        ls -la "${migrations}"
+        chmod 644 $(find "${migrations}" -type f)
+        ls -la "${migrations}"
+
+fi
+
 
 echo "### Bamboo Deployment Env -> ${bamboo_deploy_environment}"
 rm -f "${npmrc}"
