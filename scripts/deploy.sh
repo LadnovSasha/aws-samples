@@ -42,10 +42,10 @@ rm -f "${npmrc}"
 
 ls -la
 
-migration="${bamboo_build_working_directory}/${app_name}/migrations"
+migrations="${bamboo_build_working_directory}/migrations"
 
 if [ -d "${migrations}" ]; then
-
+        echo "### Migrations section"
         ls -la "${migrations}"
         chmod 644 $(find "${migrations}" -type f)
         ls -la "${migrations}"
