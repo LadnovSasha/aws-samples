@@ -9,7 +9,7 @@ docker: node:10-slim
 
 stages:
   - Build:
-    - Build
+      - Build
   - Sonar:
       manual: true
       jobs:
@@ -26,13 +26,13 @@ Build:
         test-results: 'test-report.json'
   final-tasks:
     - script:
-      - echo "Final task"
-      - scripts/notifications.sh build
+        - echo "Final task"
+        - scripts/notifications.sh build
   artifacts:
-     - name: package.json
-       pattern: package.json
-     - name: scripts
-       pattern: scripts/**
+    - name: package.json
+      pattern: package.json
+    - name: scripts
+      pattern: scripts/**
 
 
 Sonar:
@@ -41,14 +41,15 @@ Sonar:
         - scripts/sonar.sh
   final-tasks:
     - script:
-      - echo "Final task Sonar"
+        - echo "Final task Sonar"
+
 
 ---
 version: 2
 deployment:
   name: Fitment Lambda
   source-plan: GAASPIP-GSGFLV2A
-  
+
 
 release-naming:
   next-version-name: 1.0.${bamboo.buildNumber}
@@ -73,8 +74,8 @@ Test:
         - scripts/deploy.sh
   final-tasks:
     - script:
-      - echo "Final task"
-      - scripts/notifications.sh deploy
+        - echo "Final task"
+        - scripts/notifications.sh deploy
 
 
 Staging:
@@ -90,8 +91,8 @@ Staging:
         - scripts/deploy.sh
   final-tasks:
     - script:
-      - echo "Final task"
-      - scripts/notifications.sh deploy
+        - echo "Final task"
+        - scripts/notifications.sh deploy
 
 
 Prod:
@@ -107,8 +108,8 @@ Prod:
         - scripts/deploy.sh
   final-tasks:
     - script:
-      - echo "Final task"
-      - scripts/notifications.sh deploy
+        - echo "Final task"
+        - scripts/notifications.sh deploy
 
 
 ---
@@ -124,6 +125,19 @@ deployment-permissions:
       - view
 
 
+default-environment-permissions:
+  - groups:
+      - gaas-developers
+    permissions:
+      - view
+  - groups:
+      - gaas-admins
+    permissions:
+      - view
+      - edit
+      - deploy
+
+
 environment-permissions:
   - Test:
       - groups:
@@ -132,31 +146,31 @@ environment-permissions:
           - view
           - edit
           - deploy
-      - groups:
-          - gaas-admin
-        permissions:
-          - view
-          - edit
-          - deploy
-  - Staging:
-      - groups:
-          - gaas-developers
-        permissions:
-          - view
-      - groups:
-          - gaas-admin
-        permissions:
-          - view
-          - edit
-          - deploy
-  - Prod:
-      - groups:
-          - gaas-developers
-        permissions:
-          - view
-      - groups:
-          - gaas-admin
-        permissions:
-          - view
-          - edit
-          - deploy
+      # - groups:
+      #     - gaas-admin
+      #   permissions:
+      #     - view
+      #     - edit
+      #     - deploy
+  # - Staging:
+  #     - groups:
+  #         - gaas-developers
+  #       permissions:
+  #         - view
+  #     # - groups:
+  #     #     - gaas-admin
+  #     #   permissions:
+  #     #     - view
+  #     #     - edit
+  #     #     - deploy
+  # - Prod:
+  #     - groups:
+  #         - gaas-developers
+  #       permissions:
+  #         - view
+  #     # - groups:
+  #     #     - gaas-admin
+  #     #   permissions:
+  #     #     - view
+  #     #     - edit
+  #     #     - deploy
