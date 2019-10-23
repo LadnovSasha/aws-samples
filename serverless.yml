@@ -111,7 +111,7 @@ functions:
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
     events:
     - http:
-        path: ${self:provider.environment.API_VERSION}/{country}/car
+        path: ${self:provider.environment.API_VERSION}/{country}/manufacturers
         method: get
         cors: true
         private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
