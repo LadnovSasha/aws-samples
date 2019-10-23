@@ -132,13 +132,31 @@ environment-permissions:
           - view
           - edit
           - deploy
+      - groups:
+          - gaas-admin
+        permissions:
+          - view
+          - edit
+          - deploy
   - Staging:
       - groups:
           - gaas-developers
         permissions:
           - view
+      - groups:
+          - gaas-admin
+        permissions:
+          - view
+          - edit
+          - deploy
   - Prod:
       - groups:
           - gaas-developers
         permissions:
           - view
+      - groups:
+          - gaas-admin
+        permissions:
+          - view
+          - edit
+          - deploy
