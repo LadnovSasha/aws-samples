@@ -105,3 +105,38 @@ function slack_deploy_failed() {
             -i ":rain_cloud:"
 
 }
+
+
+function sonar_scanner() {
+
+    OPTIND=1
+    echo "${FUNCNAME[0]} function has been started"
+
+    while getopts k:u:t: option
+        do 
+            case "${option}" in
+                k) projectKey=${OPTARG};; 
+                u) hostUrl=${OPTARG};; 
+                t) login=${OPTARG};;
+                *) echo "Required options are: k, u, t"; exit 1;;
+            esac
+        done
+
+    java -version
+
+    sonar-scanner --version
+
+    sonar-scanner \
+        -Dsonar.projectKey=gaas-${projectKey} \
+        -Dsonar.sources=. \
+        -Dsonar.java.binaries=. \
+        -Dsonar.exclusions="node_modules/**/*" \
+        -Dsonar.host.url=${hostUrl} \
+        -Dsonar.login=${login} \
+        -Dsonar.javascript.lcov.reportPaths=reports/coverage/lcov.info \
+        -Dsonar.typescript.lcov.reportPaths=reports/coverage/lcov.info \
+        > sonar.log
+    
+    if grep -q "EXECUTION SUCCESS" sonar.log ; then echo "Sonar has no errors" ; else echo "Sonar error detected, breaking.." && exit 1; fi
+
+}
