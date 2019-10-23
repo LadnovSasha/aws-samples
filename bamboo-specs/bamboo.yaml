@@ -39,6 +39,8 @@ Sonar:
   tasks:
     - script:
         - scripts/sonar.sh
+  docker:
+    image: node:10
   final-tasks:
     - script:
         - echo "Final task Sonar"
