@@ -1,6 +1,6 @@
-import { ParseService } from 'lambda-core' ;
+import { ParseService } from 'lambda-core';
 
-export default [{
+export const fitmentConfiguration = [{
     source: 'UniqueVehicle',
     target: 'vehicleId',
     format: ParseService.stringFormat,
@@ -160,4 +160,22 @@ export default [{
     source: 'AxleLoadRear',
     target: 'axleLoadRear',
     format: ParseService.numberFormat,
+}];
+
+export const dictionaryConfiguration = [{
+    source: 'key',
+    target: 'key',
+    format: ParseService.stringFormat,
+}, {
+    source: 'en',
+    target: 'en_gb',
+    format: ParseService.stringFormat,
+}, {
+    source: 'de',
+    target: 'de_de',
+    format: ParseService.stringFormat,
+}, {
+    source: 'pl',
+    target: 'pl_pl',
+    format: ParseService.stringFormat,
 }];

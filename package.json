@@ -20,8 +20,8 @@
   "dependencies": {
     "aws-xray-sdk": "^2.4.0",
     "csv-parse": "^4.6.3",
-    "fitment-interface": "1.0.3",
-    "lambda-core": "1.2.44",
+    "fitment-interface": "1.0.4",
+    "lambda-core": "1.2.47",
     "pg": "^7.12.1",
     "request": "^2.88.0",
     "serverless-pg-migrations": "^1.0.1",

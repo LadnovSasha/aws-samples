@@ -38,6 +38,23 @@ Resources:
       MasterUserPassword: ${opt:pg-password}
       DBName: fitment
       Engine: postgres
+  FitmentImportQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: "${self:service}-${opt:stage, self:provider.stage}-fitment-import"
+      MessageRetentionPeriod: 86400
+      VisibilityTimeout: 600
+      RedrivePolicy:
+        deadLetterTargetArn:
+          "Fn::GetAtt":
+            - FitmentImportDeadLetterQueue
+            - Arn
+        maxReceiveCount: 5
+  FitmentImportDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: "${self:service}-${opt:stage, self:provider.stage}-fitment-import-deadletter"
+      MessageRetentionPeriod: 1209600
   requestBodyValidator:
     Type: 'AWS::ApiGateway::RequestValidator'
     Properties:

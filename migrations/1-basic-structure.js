@@ -17,6 +17,21 @@ module.exports = {
             logo varchar(50)
         );
     `)).then(() => migration.sequelize.query(`
+        CREATE TABLE fuelTypes (
+            key varchar(50) PRIMARY KEY,
+            value jsonb
+        );
+    `)).then(() => migration.sequelize.query(`
+        CREATE TABLE formatTypes (
+            key varchar(50) PRIMARY KEY,
+            value jsonb
+        );
+    `)).then(() => migration.sequelize.query(`
+        CREATE TABLE segmentTypes (
+            key varchar(50) PRIMARY KEY,
+            value jsonb
+        );
+    `)).then(() => migration.sequelize.query(`
         CREATE TABLE tires (
             matnr varchar(20) PRIMARY KEY,
             brand varchar(10) REFERENCES brands (key) ON UPDATE CASCADE,
@@ -43,11 +58,12 @@ module.exports = {
             "startBuildMonth" INTEGER,
             "endBuildYear" INTEGER,
             "endBuildMonth" INTEGER,
-            fuel jsonb,
+            "fuelId" varchar(50) REFERENCES fuelTypes(key) ON UPDATE CASCADE,
+            "segmentId" varchar(50) REFERENCES segmentTypes(key) ON UPDATE CASCADE,
             volume INTEGER,
             "engineDescription" jsonb,
             "engineSizeKw" INTEGER,
-            format jsonb,
+            "formatId" varchar(50) REFERENCES formatTypes(key) ON UPDATE CASCADE,
             "maxSpeed" INTEGER,
             weight DECIMAL(10, 1),
             "axleLoad" jsonb
@@ -78,6 +94,9 @@ module.exports = {
            .then(() => migration.sequelize.query(`DROP TABLE brands;`))
            .then(() => migration.sequelize.query(`DROP TABLE designs;`))
            .then(() => migration.sequelize.query(`DROP TABLE manufacturers;`))
+           .then(() => migration.sequelize.query(`DROP TABLE fuelTypes;`))
+           .then(() => migration.sequelize.query(`DROP TABLE formatTypes;`))
+           .then(() => migration.sequelize.query(`DROP TABLE segmentTypes;`))
            .then(() => migration.sequelize.query(`DROP TYPE wheelposition;`));
     }
 };

@@ -9,6 +9,23 @@ Resources:
       BucketName: ${self:provider.environment.BUCKET}
       MetricsConfigurations:
         - Id: EntireBucket
+  FitmentImportQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: "${self:service}-${opt:stage, self:provider.stage}-fitment-import"
+      MessageRetentionPeriod: 86400
+      VisibilityTimeout: 600
+      RedrivePolicy:
+        deadLetterTargetArn:
+          "Fn::GetAtt":
+            - FitmentImportDeadLetterQueue
+            - Arn
+        maxReceiveCount: 5
+  FitmentImportDeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: "${self:service}-${opt:stage, self:provider.stage}-fitment-import-deadletter"
+      MessageRetentionPeriod: 1209600
   ImportFitmentsPermissionImportS3:
     Type: "AWS::Lambda::Permission"
     Properties:

@@ -2,23 +2,32 @@ import { injectCache, injectStore } from 'lambda-core';
 import * as sinon from 'sinon';
 
 const importServiceMock = {
-    importFile: sinon.stub().resolves(),
+    importChunk: sinon.stub().resolves(),
+};
+
+const sqsMock = {
+    delete: sinon.stub().resolves(),
+    send: sinon.stub().resolves(),
 };
 
 describe('src/import/import.controller', () => {
+    const instance = require('./handler');
+
     beforeAll(() => {
         injectCache.clear();
         injectStore.set('ImportService', {
             create: () => Promise.resolve(importServiceMock),
         });
+        injectStore.set('SqsService', {
+            create: () => Promise.resolve(sqsMock),
+        });
     });
 
     describe('importFitments()', () => {
-        const instance: any = require('./handler');
         let response: any;
         const event = {
             s3: {
-                object: { key: 'import/test.csv', size: 2097152 },
+                object: { key: 'import/test.txt', size: 1048576 * 20 },
             },
         };
 
@@ -26,14 +35,39 @@ describe('src/import/import.controller', () => {
             response = await instance.importFitments({ Records: [event] }, null, null);
         });
 
-        it('Should call importService with the filename', () => {
-            expect(
-                importServiceMock.importFile.calledWith('import/test.csv'),
-            ).toBeTruthy();
+        it('Should start import beadbarcode file', async () => {
+            expect(response.success).toEqual(true);
         });
 
-        it('Should return success', () => {
-            expect(response.success).toBeTruthy();
+        it('Should send chunks to sqs queue', () => {
+            const [firstRange] = sqsMock.send.getCall(0).args;
+            const[secondRange] = sqsMock.send.getCall(1).args;
+
+            expect(firstRange).toEqual({
+                data: { start: 0, end: 10485759, fileName: 'import/test.txt' },
+            });
+            expect(secondRange).toEqual({
+                data: { start: 10485760, end: 20971519, fileName: 'import/test.txt' },
+            });
+        });
+    });
+
+    describe('handleImport()', () => {
+        beforeAll(async () => {
+            await instance.handleImport({
+                Records: [
+                    { body: '{"start":0,"end":100,"fileName":"import/test.txt"}' },
+                ],
+            }, null, null);
+        });
+
+        it('Should process chunk', () => {
+            const [query] = importServiceMock.importChunk.getCall(0).args;
+            expect(query).toEqual({
+                fileName: 'import/test.txt',
+                start: 0,
+                end: 100,
+            });
         });
     });
 });

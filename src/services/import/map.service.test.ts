@@ -61,22 +61,43 @@ describe('src/services/import/import.service', () => {
 
     describe('unmarshalVehicle()', () => {
         const instance: any = new MapService('de_de');
+        const dbMock = {
+            query: sinon.stub()
+                .onFirstCall().resolves({ rows: [{ key: 'segment' }] })
+                .onSecondCall().resolves({ rows: [{ key: 'fuel' }] })
+                .onThirdCall().resolves({ rows: [{ key: 'format' }] }),
+        };
 
         beforeAll(() => {
+            injectCache.clear();
+            injectStore.delete('PG');
+            injectStore.set('PG', {
+                create: () => Promise.resolve(dbMock),
+            });
             instance.checkAndGetManufacturer = () => Promise.resolve('alfa');
         });
+
         it('Should map vehicle data', async () => {
             const result = await instance.unmarshalVehicle({
                 vehicleId: 'test',
                 fuel: 'fuel',
+                segment: 'hatch',
+                format: 'format',
                 hubraum: 1,
                 hsntsn: '320 150',
             });
 
             expect(result.id).toEqual('test');
             expect(result.countries).toEqual(['de']);
-            expect(result.fuel).toEqual({ de_de: 'fuel' });
+            expect(result.fuelId).toEqual('fuel');
+            expect(result.segmentId).toEqual('segment');
+            expect(result.formatId).toEqual('format');
             expect(result.hsntsn).toEqual([[320, 150]]);
+        });
+
+        it('Should request dictionary value by locale', () => {
+            const [query] = dbMock.query.getCall(0).args;
+            expect(query).toMatch(/SELECT key from segmenttypes WHERE lower\(value->>'de_de'\) = lower\(\$1\)/);
         });
     });
 

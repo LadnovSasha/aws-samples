@@ -1,9 +1,13 @@
-import { IImportFitment, IVehicle, IFitment } from 'fitment-interface';
+import {
+    IImportFitment, IVehicle, IFitment,
+} from 'fitment-interface';
 import { Injectable, Inject } from 'lambda-core';
 import { PoolClient } from 'pg';
 import { transliterate } from 'transliteration';
+import { DictionaryTables } from './map.service.interface';
 
 const manufacturersCache: Map<string, Promise<any>> = new Map();
+
 export class MapService {
     protected manufacturersTable: string = 'manufacturers';
     public country: string;
@@ -69,17 +73,14 @@ export class MapService {
             startBuildMonth: raw.startBuildMonth,
             endBuildYear: raw.endBuildYear,
             endBuildMonth: raw.endBuildMonth,
-            fuel: {
-                [this.locale]: raw.fuel,
-            },
+            segmentId: await this.getDictionaryKey(DictionaryTables.SEGMENT, raw.segment),
+            fuelId: await this.getDictionaryKey(DictionaryTables.FUEL, raw.fuel),
             volume: raw.hubraum,
             engineDescription: {
                 [this.locale]: raw.engineDescription,
             },
             engineSizeKw: raw.engineSizeKW,
-            format: {
-                [this.locale]: raw.format,
-            },
+            formatId: await this.getDictionaryKey(DictionaryTables.FORMAT, raw.format),
             maxSpeed: raw.maxSpeed,
             weight: raw.weight,
             axleLoad: {
@@ -87,6 +88,23 @@ export class MapService {
                 rear: raw.axleLoadRear,
             },
         };
+    }
+
+    @Injectable()
+    async getDictionaryKey(
+        type: DictionaryTables,
+        name: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ) {
+        const { rows } = await db!.query(`
+        SELECT key from ${type} WHERE lower(value->>'${this.locale}') = lower($1)
+        `, [name]);
+
+        if (rows.length === 0) {
+            throw new Error('Unsupported locale or dictionary value');
+        }
+
+        return rows[0].key;
     }
 
     static unmarshalFitment(raw: IImportFitment): IFitment {

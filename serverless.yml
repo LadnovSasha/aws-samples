@@ -12,6 +12,8 @@ provider:
     COMMIT_HASH: ${opt:commitHash, 'latest'}
     DEPLOY_TIME: ${opt:deployTime, ''}
     DB_IDENTIFIER: ${opt:stage, self:provider.stage}-fitment-encrypted-${opt:salt, "local"}
+    FITMENT_QUEUE_URL:
+      Ref: FitmentImportQueue
     BUCKET: ${opt:stage, self:provider.stage}-fitment-import-${opt:salt, "local"}
     DATABASE_URL:
       "Fn::Join":
@@ -95,6 +97,26 @@ functions:
             description: Returned when the operation is completed successfully.
             responseModels:
               "application/json": HealthStatusResponse
+  importHandler:
+    handler: src/import/handler.handleImport
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    concurrency: 50
+    events:
+    - sqs:
+        batchSize: 1
+        arn:
+          Fn::GetAtt:
+            - FitmentImportQueue
+            - Arn
+  importDictionaries:
+    handler: src/import/handler.importDictionaries
+    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    events:
+    - s3:
+        bucket: Import
+        event: s3:ObjectCreated:*
+        rules:
+          - prefix: dictionaries/
   importFitments:
     handler: src/import/handler.importFitments
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
