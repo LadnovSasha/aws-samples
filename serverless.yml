@@ -33,6 +33,7 @@ provider:
         - "xray:PutTelemetryRecords"
         - "s3:*"
         - "lambda:InvokeFunction"
+        - "sqs:*"
       Resource:
         - "*"
 

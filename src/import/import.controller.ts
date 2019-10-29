@@ -36,7 +36,7 @@ export class ImportController extends Controller {
     @Injectable()
     @Resource()
     public async importFitments(
-        @Inject('SqsService', { url: process.env.BEADBARCODE_QUEUE_URL }) sqs?: SqsService,
+        @Inject('SqsService', { url: process.env.FITMENT_QUEUE_URL }) sqs?: SqsService,
     ) {
         const { Records } = <any>this.getEvent();
         const sqsRequests = Records.reduce((promises: Promise<any>[], record: S3EventRecord) => {
