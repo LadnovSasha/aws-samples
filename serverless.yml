@@ -15,15 +15,7 @@ provider:
     FITMENT_QUEUE_URL:
       Ref: FitmentImportQueue
     BUCKET: ${opt:stage, self:provider.stage}-fitment-import-${opt:salt, "local"}
-    DATABASE_URL:
-      "Fn::Join":
-      - ""
-      -
-        - "postgres://${opt:pg-user, 'developer'}:${opt:pg-password, 'developerSuperPWD'}@"
-        - "Fn::GetAtt": [DBInstance, Endpoint.Address]
-        - ":"
-        - "Fn::GetAtt": [DBInstance, Endpoint.Port]
-        - "/fitment"
+    DATABASE_URL: ${file(./sls/${opt:stage, self:provider.stage}.yml):DATABASE_URL}
   tracing: true # enable tracing
   usagePlan: {}
   iamRoleStatements:
