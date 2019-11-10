@@ -89,6 +89,7 @@ module.exports = {
        return migration.sequelize
            .query(`DROP TABLE originaltires;`)
            .then(() => migration.sequelize.query(`DROP TABLE fitments;`))
+           .then(() => migration.sequelize.query(`DROP TYPE wheelposition;`))
            .then(() => migration.sequelize.query(`DROP TABLE vehicles;`))
            .then(() => migration.sequelize.query(`DROP TABLE tires;`))
            .then(() => migration.sequelize.query(`DROP TABLE brands;`))

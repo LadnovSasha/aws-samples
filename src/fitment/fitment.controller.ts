@@ -2,55 +2,61 @@ import {
     Controller, Resource, Injectable,
     Inject, MockService,
 } from 'lambda-core';
+import { FitmentService } from '../services/fitment/fitment.service';
+import {
+    IManufacturersPathRequest, IManufacturersQueryRequest,
+    IVehicleByIdPathRequest, IVehicleByIdQueryRequest,
+    IVehicleByMakePathRequest, IVehicleByMakeQueryRequest, IVehicleByHsnTsnPathRequest, IVehicleByHsnTsnQueryRequest,
+} from 'fitment-interface';
 
 export class FitmentController extends Controller {
     @Injectable()
     @Resource()
     async getManufacturers(
-        @Inject('MockService', { name: 'mock/manufacturers.json' }) mock?: MockService,
+        @Inject('FitmentService') service?: FitmentService,
     ) {
+        const { country } = this.getPathParams<IManufacturersPathRequest>();
+        const { language } = this.getPathParams<IManufacturersQueryRequest>();
         return this.getResponse().ok(
-            await mock!.getAll(),
+            await service!.getManufacturers(country, language),
         );
     }
 
     @Injectable()
     @Resource()
     async getCarByMake(
-        @Inject('MockService', { name: 'mock/vehicles.json' }) mock?: MockService,
+        @Inject('FitmentService') service?: FitmentService,
     ) {
-        const { make } = this.getPathParams();
-        const vehicles = await mock!.getAll();
-        const matchedVehicles = vehicles.filter((x: any) => x.manufacturer.id === make);
-        return this.getResponse().ok(matchedVehicles);
+        const { country, make } = this.getPathParams<IVehicleByMakePathRequest>();
+        const query = this.getQueryParams<IVehicleByMakeQueryRequest>();
+        return this.getResponse().ok(
+            await service!.getVehiclesByMake(country, make, query),
+        );
     }
 
     @Injectable()
     @Resource()
     async getCarById(
-        @Inject('MockService', { name: 'mock/vehicles.json' }) mock?: MockService,
+        @Inject('FitmentService') service?: FitmentService,
     ) {
-        const { vehicleId } = this.getPathParams();
-        const vehicles = await mock!.getAll();
-        const matchedVehicle = vehicles.find((x: any) => x.id === vehicleId);
-        if (!matchedVehicle) {
-            return this.getResponse().notFound('Vehicle not found');
-        }
-        return this.getResponse().ok(matchedVehicle);
+        const { vehicleId, country } = this.getPathParams<IVehicleByIdPathRequest>();
+        const { language } = this.getQueryParams<IVehicleByIdQueryRequest>();
+
+        return this.getResponse().ok(
+            await service!.getVehicleById(country, vehicleId, language),
+        );
     }
 
     @Injectable()
     @Resource()
     async getCarByHsnTsn(
-        @Inject('MockService', { name: 'mock/vehicles.json' }) mock?: MockService,
+        @Inject('FitmentService') service?: FitmentService,
     ) {
-        const { hsn, tsn } = this.getPathParams();
-        const vehicles = await mock!.getAll();
-        const matchedVehicles = vehicles.filter((x: any) => {
-            const hsntsnArray = x.hsntsn.map((z: any) => `${z.hsn}${z.tsn}`);
-            return hsntsnArray.includes(`${hsn}${tsn}`);
-        });
-        return this.getResponse().ok(matchedVehicles);
+        const { hsn, tsn, country } = this.getPathParams<IVehicleByHsnTsnPathRequest>();
+        const { language } = this.getPathParams<IVehicleByHsnTsnQueryRequest>();
+        return this.getResponse().ok(
+            await service!.getVehiclesByHsnTsn(country, { hsn, tsn }, language),
+        );
     }
 
     @Injectable()
