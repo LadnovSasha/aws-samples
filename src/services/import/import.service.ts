@@ -46,7 +46,7 @@ export class ImportService {
         config: IParseServiceConfig[],
         @Inject('ParseService', { delimiter: ';' }) parser?: ParseService,
     ) {
-        const items: IDictionaryCsvRow[] = await parser!.parse(
+        const items: IDictionaryCsvRow[] = await parser!.parse<IDictionaryCsvRow>(
             await this.file.getFile(filename),
             config,
         );
@@ -169,7 +169,7 @@ export class ImportService {
         const { data } = await this.file.getFileByRange(range.fileName, range.start, range.end);
 
         const normalizedCsvChunk = await this.normalizeCsvData(data, range.fileName, range.start);
-        return parser!.parse(normalizedCsvChunk, config);
+        return parser!.parse<T>(normalizedCsvChunk, config);
     }
 
     protected async normalizeCsvData(csv: string, filename: string, endRange: number): Promise<string> {

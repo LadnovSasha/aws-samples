@@ -87,17 +87,17 @@ module.exports = {
     },
     down(migration) {
        return migration.sequelize
-           .query(`DROP TABLE originaltires;`)
-           .then(() => migration.sequelize.query(`DROP TABLE fitments;`))
-           .then(() => migration.sequelize.query(`DROP TYPE wheelposition;`))
-           .then(() => migration.sequelize.query(`DROP TABLE vehicles;`))
-           .then(() => migration.sequelize.query(`DROP TABLE tires;`))
-           .then(() => migration.sequelize.query(`DROP TABLE brands;`))
-           .then(() => migration.sequelize.query(`DROP TABLE designs;`))
-           .then(() => migration.sequelize.query(`DROP TABLE manufacturers;`))
-           .then(() => migration.sequelize.query(`DROP TABLE fuelTypes;`))
-           .then(() => migration.sequelize.query(`DROP TABLE formatTypes;`))
-           .then(() => migration.sequelize.query(`DROP TABLE segmentTypes;`))
-           .then(() => migration.sequelize.query(`DROP TYPE wheelposition;`));
+           .query(`DROP TABLE IF EXISTS originaltires;`)
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS fitments;`))
+           .then(() => migration.sequelize.query(`DROP TYPE IF EXISTS wheelposition;`))
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS vehicles;`))
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS tires;`))
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS brands;`))
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS designs;`))
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS manufacturers;`))
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS fuelTypes;`))
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS formatTypes;`))
+           .then(() => migration.sequelize.query(`DROP TABLE IF EXISTS segmentTypes;`))
+           .then(() => migration.sequelize.query(`DROP TYPE IF EXISTS wheelposition;`));
     }
 };
