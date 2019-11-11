@@ -41,10 +41,8 @@ export class FitmentController extends Controller {
     ) {
         const { vehicleId, country } = this.getPathParams<IVehicleByIdPathRequest>();
         const { language } = this.getQueryParams<IVehicleByIdQueryRequest>();
-
-        return this.getResponse().ok(
-            await service!.getVehicleById(country, vehicleId, language),
-        );
+        const response = await service!.getVehicleById(country, vehicleId, language);
+        return response ? this.getResponse().ok(response) : this.getResponse().notFound('Requested vehicle not found');
     }
 
     @Injectable()

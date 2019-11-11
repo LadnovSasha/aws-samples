@@ -136,18 +136,55 @@ describe('src/services/fitment/fitment.service', () => {
         });
 
         it('Should return undefined if vehicle not found', async () => {
-            const response = await instance.getVehicleById('de', 'vehicleId', '');
+            const response = await instance.getVehicleById('de', 'vehicleId', 'de_de');
 
             expect(response).toBeUndefined();
         });
     });
 
     describe('getFitmentsByVehicle()', () => {
+        let response: any;
         const instance: any = new FitmentService();
         const pg = {
             query: sandbox.stub().resolves({
-                rows: [{ id: 'vehicleId', hsntsnRaw: ['123,456'], maxSpeedKm: 10 }],
+                rows: [{ id: 'vehicleId', frontDimension: {}, rearDimension: {} }],
             }),
         };
+
+        beforeAll(async () => {
+            injectCache.clear();
+            injectStore.set('PG', {
+                create: () => Promise.resolve(pg),
+            });
+
+            response = await instance.getFitmentsByVehicle('vehicleId');
+        });
+
+        it('Should build query', () => {
+            const [query, values] = pg.query.getCall(0).args;
+
+            expect(query).toMatch(/FROM fitments WHERE "vehicleId" = \$1/);
+            expect(values).toEqual(['vehicleId']);
+        });
+
+        it('Should return fitment', () => {
+            expect(response).toEqual([{
+                mixedFitment: false,
+                frontDimension: {},
+                rearDimension: {},
+            }]);
+        });
+
+        it('Should set mixedFitment to false if fitments are equal', () => {
+            expect(response[0].mixedFitment).toBeFalsy();
+        });
+    });
+
+    describe('static getInstance()', () => {
+        it('Should return new instance', async () => {
+            expect(
+                await FitmentService.getInstance(),
+            ).toBeInstanceOf(FitmentService);
+        });
     });
 });

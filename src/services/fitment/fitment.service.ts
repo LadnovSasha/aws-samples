@@ -8,9 +8,6 @@ import {
 } from 'fitment-interface';
 import { IVehicleRaw } from './fitment.service.interface';
 const omit = require('lodash.omit');
-const countryToLocaleMap = new Map([
-    ['de', 'de_de'],
-]);
 
 export class FitmentService {
     static fallbackLocale = 'de_de';
@@ -24,7 +21,7 @@ export class FitmentService {
         language?: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<IManufacturersResponse> {
-        const locale = language ? language : this.getLocaleFromCountry(country);
+        const locale = language || FitmentService.fallbackLocale;
         const { rows } = await db!.query(`
             Select
                 key as id, name->'${locale}' as name, logo as "logoUrl"
@@ -41,7 +38,7 @@ export class FitmentService {
         language?: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<IVehicleFitmentsResponse[]> {
-        const locale = language ? language : this.getLocaleFromCountry(country);
+        const locale = language || FitmentService.fallbackLocale;
         const hsntsnValue = [hsntsn.hsn, hsntsn.tsn].join(',');
         const { text, values } = this.getBaseVehicleRequest(locale, country)
             .where('? = ANY (v.hsntsn)', hsntsnValue).toParam();
@@ -64,7 +61,7 @@ export class FitmentService {
         query: IVehicleByMakeQueryRequest,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<IVehicleFitmentsResponse[]> {
-        const locale = query.language ? query.language : this.getLocaleFromCountry(country);
+        const locale = query.language || FitmentService.fallbackLocale;
         const sqlQuery = this.getBaseVehicleRequest(locale, country)
             .where('v.manufacturer = ?', makeId);
 
@@ -97,7 +94,7 @@ export class FitmentService {
         language?: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<IVehicleFitmentsResponse | undefined> {
-        const locale = language ? language : this.getLocaleFromCountry(country);
+        const locale = language || FitmentService.fallbackLocale;
         const { text, values } = this.getBaseVehicleRequest(locale, country)
             .where('v.id = ?', vehicleId).toParam();
         const { rows } = await db!.query<IVehicleRaw>(text, values);
@@ -174,12 +171,6 @@ export class FitmentService {
         `, [vehicleId]);
 
         return FitmentService.unmarshalFitments(rows);
-    }
-
-    protected getLocaleFromCountry(country: string) {
-        const locale = countryToLocaleMap.get(country);
-
-        return locale || FitmentService.fallbackLocale;
     }
 
     static unmarshalFitments(fitments: IFitmentResponse[]): IFitmentResponse[] {
