@@ -14,7 +14,7 @@ provider:
     DB_IDENTIFIER: ${opt:stage, self:provider.stage}-fitment-encrypted-${opt:salt, "local"}
     FITMENT_QUEUE_URL:
       Ref: FitmentImportQueue
-    BUCKET: development-fitment-import-${opt:salt, "local"}
+    BUCKET: ${opt:stage, self:provider.stage}-fitment-import-${opt:salt, "local"}
     DATABASE_URL: ${file(./sls/${opt:stage, self:provider.stage}.yml):DATABASE_URL}
   tracing: true # enable tracing
   usagePlan: {}
@@ -95,9 +95,6 @@ functions:
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
     concurrency: 50
     events:
-    - http:
-        path: ${self:provider.environment.API_VERSION}/test/import
-        method: get
     - sqs:
         batchSize: 1
         arn:
