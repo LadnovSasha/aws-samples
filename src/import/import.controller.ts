@@ -7,7 +7,7 @@ import { IFileRange } from '../services/import/import.service.interface';
 import { S3EventRecord } from 'aws-lambda';
 
 export class ImportController extends Controller {
-    static chunkSize = 1048576 * 10; // 10mb
+    static chunkSize = 1048576; // 1mb
     static dictionaryFiles = [
         'dictionaries/fuel.csv',
         'dictionaries/vehicleFormat.csv',
@@ -21,6 +21,8 @@ export class ImportController extends Controller {
     public async handleImport(
         @Inject('ImportService') importService: ImportService,
     ) {
+        await importService.importChunk({"start":4194304,"end":5242879,"fileName":"import/GDY_DE_DE.csv"});
+        returh this.getResponse().ok();
         const now = Date.now();
         const { Records } = <any>this.getEvent();
         const promises = Records.map(async (record: any) => {

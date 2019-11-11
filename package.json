@@ -20,7 +20,7 @@
   "dependencies": {
     "aws-xray-sdk": "^2.4.0",
     "csv-parse": "^4.6.3",
-    "lambda-core": "1.2.47",
+    "lambda-core": "git+ssh://git@bitbucket.org/emea_cf/lambda-core.git#feature/file-readable",
     "lodash.omit": "^4.5.0",
     "pg": "^7.12.1",
     "request": "^2.88.0",
