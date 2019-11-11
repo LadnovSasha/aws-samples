@@ -95,9 +95,6 @@ functions:
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
     concurrency: 50
     events:
-    - http:
-        path: ${self:provider.environment.API_VERSION}/import
-        method: get
     - sqs:
         batchSize: 1
         arn:
@@ -108,9 +105,6 @@ functions:
     handler: src/import/handler.importDictionaries
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
     events:
-    - http:
-        path: ${self:provider.environment.API_VERSION}/dic
-        method: get
     - s3:
         bucket: Import
         event: s3:ObjectCreated:*
