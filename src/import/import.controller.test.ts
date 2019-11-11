@@ -44,10 +44,10 @@ describe('src/import/import.controller', () => {
             const[secondRange] = sqsMock.send.getCall(1).args;
 
             expect(firstRange).toEqual({
-                data: { start: 0, end: 10485759, fileName: 'import/test.txt' },
+                data: { start: 0, end: 102399, fileName: 'import/test.txt' },
             });
             expect(secondRange).toEqual({
-                data: { start: 10485760, end: 20971519, fileName: 'import/test.txt' },
+                data: { start: 102400, end: 204799, fileName: 'import/test.txt' },
             });
         });
     });
