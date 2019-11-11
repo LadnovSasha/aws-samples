@@ -164,12 +164,12 @@ export class ImportService {
     async parseFile<T>(
         range: IFileRange,
         config: IParseServiceConfig[],
-        @Inject('ParseService', { delimiter: ImportService.delimeter, skipHeader: true }) parser?: ParseService,
+        @Inject('ParseService', { delimiter: ImportService.delimeter }, { skipHeader: true }) parser?: ParseService,
     ): Promise<T[]> {
         const { data } = await this.file.getFileByRange(range.fileName, range.start, range.end);
 
         const normalizedCsvChunk = await this.normalizeCsvData(data, range.fileName, range.start);
-        return parser!.parse<T>(normalizedCsvChunk, config);
+        return await parser!.parse<T>(normalizedCsvChunk, config);
     }
 
     protected async normalizeCsvData(csv: string, filename: string, endRange: number): Promise<string> {

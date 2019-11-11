@@ -7,7 +7,7 @@ import { IFileRange } from '../services/import/import.service.interface';
 import { S3EventRecord } from 'aws-lambda';
 
 export class ImportController extends Controller {
-    static chunkSize = 1048576 * 10; // 10mb
+    static chunkSize = 1048576; // 1mb
     static dictionaryFiles = [
         'dictionaries/fuel.csv',
         'dictionaries/vehicleFormat.csv',
