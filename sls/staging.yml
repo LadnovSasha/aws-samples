@@ -5,7 +5,15 @@ vpc:
         "Fn::Split":
             - ","
             - ${opt:vpcSubnet, 'subnet-0bae2aff6ea3346ac,subnet-0cfc5c84e690e4875'}
-
+DATABASE_URL:
+  "Fn::Join":
+  - ""
+  -
+    - "postgres://${opt:pg-user, 'developer'}:${opt:pg-password, 'developerSuperPWD'}@"
+    - "Fn::GetAtt": [DBInstance, Endpoint.Address]
+    - ":"
+    - "Fn::GetAtt": [DBInstance, Endpoint.Port]
+    - "/fitment"
 alertNotifications: ${file(node_modules/lambda-core/sls/alarms.yml):stagingAlertNotifications}
 endpointIsPrivate: true
 Resources:

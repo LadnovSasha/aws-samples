@@ -1,4 +1,13 @@
 vpc: ""
+DATABASE_URL:
+  "Fn::Join":
+  - ""
+  -
+    - "postgres://${opt:pg-user, 'developer'}:${opt:pg-password, 'developerSuperPWD'}@"
+    - "Fn::GetAtt": [DBInstance, Endpoint.Address]
+    - ":"
+    - "Fn::GetAtt": [DBInstance, Endpoint.Port]
+    - "/fitment"
 alertNotifications: ""
 endpointIsPrivate: true
 Resources:

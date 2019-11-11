@@ -1,5 +1,6 @@
 alertNotifications: ""
 vpc: ""
+DATABASE_URL: "postgres://postgres:postgres@localhost:5432/fitment"
 Resources:
   requestBodyValidator:
     Type: 'AWS::ApiGateway::RequestValidator'

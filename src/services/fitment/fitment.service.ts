@@ -1,32 +1,209 @@
 import { Injectable, Inject } from 'lambda-core';
+import * as squel from 'squel';
 import { PoolClient } from 'pg';
-
-const countryToLocaleMap = new Map([
-    ['de', 'de_de'],
-]);
+import {
+    IManufacturersResponse, IFitmentResponse, IVehicleFitmentsResponse,
+    IFitmentsResponse, IHsnTsn,
+    IVehicleByMakeQueryRequest,
+} from 'fitment-interface';
+import { IVehicleRaw } from './fitment.service.interface';
+const omit = require('lodash.omit');
 
 export class FitmentService {
     static fallbackLocale = 'de_de';
 
+    protected vehiclesTable = 'vehicles';
+    protected squel = squel.useFlavour('postgres');
+
     @Injectable()
     async getManufacturers(
         country: string,
+        language?: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
-    ) {
-        const locale = this.getLocaleFromCountry(country);
+    ): Promise<IManufacturersResponse> {
+        const locale = language || FitmentService.fallbackLocale;
         const { rows } = await db!.query(`
             Select
-                key as id, name->'$1' as name, logo as "logoUrl"
+                key as id, name->'${locale}' as name, logo as "logoUrl"
             FROM manufacturers;
-        `, [locale]);
+        `);
 
         return rows;
     }
 
-    protected getLocaleFromCountry(country: string) {
-        const locale = countryToLocaleMap.get(country);
+    @Injectable()
+    async getVehiclesByHsnTsn(
+        country: string,
+        hsntsn: IHsnTsn,
+        language?: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ): Promise<IVehicleFitmentsResponse[]> {
+        const locale = language || FitmentService.fallbackLocale;
+        const hsntsnValue = [hsntsn.hsn, hsntsn.tsn].join(',');
+        const { text, values } = this.getBaseVehicleRequest(locale, country)
+            .where('? = ANY (v.hsntsn)', hsntsnValue).toParam();
 
-        return locale || FitmentService.fallbackLocale;
+        const { rows } = await db!.query<IVehicleRaw>(text, values);
+        const promises = rows.map(async vehicle =>
+            FitmentService.unmarshalVehicleResponse(
+                vehicle,
+                await this.getFitmentsByVehicle(vehicle.id),
+            ),
+        );
+
+        return await Promise.all(promises);
+    }
+
+    @Injectable()
+    async getVehiclesByMake(
+        country: string,
+        makeId: string,
+        query: IVehicleByMakeQueryRequest,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ): Promise<IVehicleFitmentsResponse[]> {
+        const locale = query.language || FitmentService.fallbackLocale;
+        const sqlQuery = this.getBaseVehicleRequest(locale, country)
+            .where('v.manufacturer = ?', makeId);
+
+        if (query.model) {
+            sqlQuery.where('v.model = ?', query.model);
+        }
+        if (query.energyType) {
+            sqlQuery.where('v."fuelId" = ?', query.energyType);
+        }
+        if (query.year) {
+            sqlQuery.where('v."startBuildYear" = ?', query.year);
+        }
+
+        const { text, values } = sqlQuery.toParam();
+        const { rows } = await db!.query<IVehicleRaw>(text, values);
+        const promises = rows.map(async vehicle =>
+            FitmentService.unmarshalVehicleResponse(
+                vehicle,
+                await this.getFitmentsByVehicle(vehicle.id),
+            ),
+        );
+
+        return await Promise.all(promises);
+    }
+
+    @Injectable()
+    async getVehicleById(
+        country: string,
+        vehicleId: string,
+        language?: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ): Promise<IVehicleFitmentsResponse | undefined> {
+        const locale = language || FitmentService.fallbackLocale;
+        const { text, values } = this.getBaseVehicleRequest(locale, country)
+            .where('v.id = ?', vehicleId).toParam();
+        const { rows } = await db!.query<IVehicleRaw>(text, values);
+
+        if (rows.length === 0) {
+            return;
+        }
+        const fitments = await this.getFitmentsByVehicle(vehicleId);
+        return FitmentService.unmarshalVehicleResponse(rows[0], fitments);
+    }
+
+    protected getBaseVehicleRequest(locale: string, country: string) {
+        return this.squel.select()
+            .field('v.id', 'id')
+            .field('model')
+            .field(`
+            json_build_object('id', m.key, 'name', m.name->>'${locale}', 'logo', m.logo, 'description', '')
+            `, 'manufacturer')
+            .field('platform')
+            .field('hsntsn', '"hsntsnRaw"')
+            .field('null', 'tmps')
+            .field(`st.value->>'${locale}'`, 'segment')
+            .field(`ft.value->>'${locale}'`, 'bodyCategory')
+            .field(`json_build_object('month', "startBuildMonth"::text, 'year', "startBuildYear"::text)`, 'from')
+            .field(`json_build_object('month', "endBuildMonth"::text, 'year', "endBuildYear"::text)`, 'to')
+            .field(`json_build_object('id', fuelt.key, 'name', fuelt.value->>'${locale}')`, 'energyType')
+            .field(`
+            json_build_object(
+                'cubicCapacity', volume::text,
+                'description', "engineDescription"->>'${locale}',
+                'size', json_build_object('kw', "engineSizeKw"::text, 'ps', '')
+            )`, 'engine')
+            .field('"maxSpeed"', '"maxSpeedKm"')
+            .field('weight::text', 'weight')
+            .field('"axleLoad"')
+            .from(this.vehiclesTable, 'v')
+            .where('? = ANY (v.countries)', country)
+            .left_join('manufacturers', 'm', 'manufacturer = m.key')
+            .left_join('segmenttypes', 'st', '"segmentId" = st.key')
+            .left_join('formattypes', 'ft', '"formatId" = ft.key')
+            .left_join('fueltypes', 'fuelt', '"fuelId" = fuelt.key');
+    }
+
+    @Injectable()
+    protected async getFitmentsByVehicle(
+        vehicleId: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ) {
+        const { rows } = await db!.query(`
+        Select
+            json_build_object(
+                'sizeMM', COALESCE((dimensions->'front'->'widthMM')::text, ''),
+                'sizeInch', COALESCE((dimensions->'front'->'widthInch')::text, ''),
+                'aspectRatio', COALESCE((dimensions->'front'->'aspectRatio')::text, ''),
+                'rim', COALESCE((dimensions->'front'->'rim')::text, ''),
+                'speedIndex', COALESCE((dimensions->'front'->'speedIndex')::text, ''),
+                'loadIndex', COALESCE((dimensions->'front'->'loadIndex')::text, ''),
+                'loadIndex2', COALESCE((dimensions->'front'->'loadIndex2')::text, ''),
+                'normalPressure', "normalPressure"->'front',
+                'highwayPressure', "highwayPressure"->'front'
+            ) as "frontDimension",
+            json_build_object(
+                'sizeMM', COALESCE((dimensions->'rear'->'widthMM')::text, ''),
+                'sizeInch', COALESCE((dimensions->'rear'->'widthInch')::text, ''),
+                'aspectRatio', COALESCE((dimensions->'rear'->'aspectRatio')::text, ''),
+                'rim', COALESCE((dimensions->'rear'->'rim')::text, ''),
+                'speedIndex', COALESCE((dimensions->'rear'->'speedIndex')::text, ''),
+                'loadIndex', COALESCE((dimensions->'rear'->'loadIndex')::text, ''),
+                'loadIndex2', COALESCE((dimensions->'rear'->'loadIndex2')::text, ''),
+                'normalPressure', "normalPressure"->'rear',
+                'highwayPressure', "highwayPressure"->'rear'
+            ) as "rearDimension"
+        FROM fitments WHERE "vehicleId" = $1;
+        `, [vehicleId]);
+
+        return FitmentService.unmarshalFitments(rows);
+    }
+
+    static unmarshalFitments(fitments: IFitmentResponse[]): IFitmentResponse[] {
+        return fitments.map((fitment) => {
+            const { frontDimension, rearDimension } = fitment;
+            const equal = frontDimension.sizeMM === rearDimension.sizeMM &&
+                frontDimension.sizeInch === rearDimension.sizeInch &&
+                frontDimension.rim === rearDimension.rim &&
+                frontDimension.aspectRatio === rearDimension.aspectRatio;
+
+            return {
+                frontDimension,
+                rearDimension,
+                mixedFitment: !equal,
+            };
+        });
+    }
+
+    static unmarshalVehicleResponse(vehicle: IVehicleRaw, fitments: IFitmentsResponse): IVehicleFitmentsResponse {
+        return {
+            ...omit(vehicle, ['maxSpeedKm', 'hsntsnRaw']),
+            fitments,
+            hsntsn: vehicle.hsntsnRaw.map((hsntsn: string) => {
+                const [hsn, tsn] = hsntsn.split(',');
+                return { hsn, tsn };
+            }),
+            maxSpeed: {
+                km: vehicle.maxSpeedKm,
+                mph: Number.parseFloat(
+                    (vehicle.maxSpeedKm * 0.621371).toFixed(2),
+                ),
+            },
+        };
     }
 
     static async getInstance() {
