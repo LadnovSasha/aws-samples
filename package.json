@@ -11,7 +11,8 @@
     "deploy": "serverless deploy -v --stage=development",
     "package": "serverless package -v",
     "prepublishOnly": "tsc --outDir dist",
-    "validate": "lambda-validate ./package.json"
+    "validate": "lambda-validate ./package.json",
+    "bump": "npm version patch"
   },
   "repository": {
     "type": "git",
