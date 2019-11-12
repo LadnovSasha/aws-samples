@@ -24,6 +24,13 @@ Resources:
       BucketName: ${self:provider.environment.BUCKET}
       MetricsConfigurations:
         - Id: EntireBucket
+  S3BucketPublic:
+    Type: AWS::S3::Bucket
+    Properties:
+      AccessControl: PublicRead
+      BucketName: ${self:provider.environment.BUCKET_PUBLIC}
+      MetricsConfigurations:
+        - Id: EntireBucket
   ImportFitmentsPermissionImportS3:
     Type: "AWS::Lambda::Permission"
     Properties:
