@@ -1,6 +1,6 @@
 {
   "name": "fitment-lambda",
-  "version": "1.0.16",
+  "version": "1.0.17",
   "description": "",
   "main": "./dist/src/index.js",
   "scripts": {
@@ -11,7 +11,8 @@
     "deploy": "serverless deploy -v --stage=development",
     "package": "serverless package -v",
     "prepublishOnly": "tsc --outDir dist",
-    "validate": "lambda-validate ./package.json"
+    "validate": "lambda-validate ./package.json",
+    "bump": "npm version patch"
   },
   "repository": {
     "type": "git",
