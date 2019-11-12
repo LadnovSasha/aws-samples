@@ -15,6 +15,7 @@ provider:
     FITMENT_QUEUE_URL:
       Ref: FitmentImportQueue
     BUCKET: ${opt:stage, self:provider.stage}-fitment-import-${opt:salt, "local"}
+    BUCKET_PUBLIC: ${opt:stage, self:provider.stage}-fitment-public-${opt:salt, "local"}
     DATABASE_URL: ${file(./sls/${opt:stage, self:provider.stage}.yml):DATABASE_URL}
   tracing: true # enable tracing
   usagePlan: {}
