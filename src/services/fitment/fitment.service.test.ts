@@ -21,13 +21,13 @@ describe('src/services/fitment/fitment.service', () => {
         it('Should request manufacturers by default locale', async () => {
             await instance.getManufacturers('de', '');
             const [query] = pgMock.query.getCall(0).args;
-            expect(query).toMatch(/key as id, name->'de_de' as name, logo as "logoUrl"/);
+            expect(query).toMatch(/key as id, COLAESCE\(name->'de_de', name->'de_de'\) as name, logo as "logoUrl"/);
         });
 
         it('Should request by query local', async () => {
             await instance.getManufacturers('de', 'en_us');
             const [query] = pgMock.query.getCall(1).args;
-            expect(query).toMatch(/key as id, name->'en_us' as name, logo as "logoUrl"/);
+            expect(query).toMatch(/key as id, COLAESCE\(name->'en_us', name->'de_de'\) as name, logo as "logoUrl"/);
         });
 
         afterAll(() => {

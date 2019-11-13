@@ -24,7 +24,7 @@ export class FitmentService {
         const locale = language || FitmentService.fallbackLocale;
         const { rows } = await db!.query(`
             Select
-                key as id, name->'${locale}' as name, logo as "logoUrl"
+                key as id, COLAESCE(name->'${locale}', name->'${FitmentService.fallbackLocale}') as name, logo as "logoUrl"
             FROM manufacturers;
         `);
 
@@ -38,7 +38,7 @@ export class FitmentService {
         language?: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<IVehicleFitmentsResponse[]> {
-        const locale = language || FitmentService.fallbackLocale;
+        const locale = this.buildLocale(country, language);
         const hsntsnValue = [hsntsn.hsn, hsntsn.tsn].join(',');
         const { text, values } = this.getBaseVehicleRequest(locale, country)
             .where('? = ANY (v.hsntsn)', hsntsnValue).toParam();
@@ -61,7 +61,7 @@ export class FitmentService {
         query: IVehicleByMakeQueryRequest,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<IVehicleFitmentsResponse[]> {
-        const locale = query.language || FitmentService.fallbackLocale;
+        const locale = this.buildLocale(country, query.language);
         const sqlQuery = this.getBaseVehicleRequest(locale, country)
             .where('v.manufacturer = ?', makeId);
 
@@ -111,20 +111,23 @@ export class FitmentService {
             .field('v.id', 'id')
             .field('model')
             .field(`
-            json_build_object('id', m.key, 'name', m.name->>'${locale}', 'logo', m.logo, 'description', '')
+            json_build_object('id', m.key, 'name', COLAESCE(m.name->>'${locale}', m.name->>'${FitmentService.fallbackLocale}'), 'logo', m.logo, 'description', '')
             `, 'manufacturer')
             .field('platform')
             .field('hsntsn', '"hsntsnRaw"')
             .field('null', 'tmps')
-            .field(`st.value->>'${locale}'`, 'segment')
-            .field(`ft.value->>'${locale}'`, 'bodyCategory')
+            .field(`COLAESCE(st.value->>'${locale}', st.value->>'${FitmentService.fallbackLocale}')`, 'segment')
+            .field(`COLAESCE(ft.value->>'${locale}', ft.value->>'${FitmentService.fallbackLocale}')`, 'bodyCategory')
             .field(`json_build_object('month', "startBuildMonth"::text, 'year', "startBuildYear"::text)`, 'from')
             .field(`json_build_object('month', "endBuildMonth"::text, 'year', "endBuildYear"::text)`, 'to')
-            .field(`json_build_object('id', fuelt.key, 'name', fuelt.value->>'${locale}')`, 'energyType')
+            .field(`json_build_object(
+                'id', fuelt.key,
+                'name', COLAESCE(fuelt.value->>'${locale}', fuelt.value->>'${FitmentService.fallbackLocale}')
+            )`, 'energyType')
             .field(`
             json_build_object(
                 'cubicCapacity', volume::text,
-                'description', "engineDescription"->>'${locale}',
+                'description', COLAESCE("engineDescription"->>'${locale}', "engineDescription"->>'${FitmentService.fallbackLocale}'),
                 'size', json_build_object('kw', "engineSizeKw"::text, 'ps', '')
             )`, 'engine')
             .field('"maxSpeed"', '"maxSpeedKm"')
@@ -171,6 +174,10 @@ export class FitmentService {
         `, [vehicleId]);
 
         return FitmentService.unmarshalFitments(rows);
+    }
+
+    protected buildLocale(country: string, language?: string) {
+        return `${country}_${language}`;
     }
 
     static unmarshalFitments(fitments: IFitmentResponse[]): IFitmentResponse[] {
