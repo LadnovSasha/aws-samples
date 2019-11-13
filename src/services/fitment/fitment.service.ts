@@ -24,7 +24,7 @@ export class FitmentService {
         const locale = language || FitmentService.fallbackLocale;
         const { rows } = await db!.query(`
             Select
-                key as id, COLAESCE(name->'${locale}', name->'${FitmentService.fallbackLocale}') as name, logo as "logoUrl"
+                key as id, COALESCE(name->'${locale}', name->'${FitmentService.fallbackLocale}') as name, logo as "logoUrl"
             FROM manufacturers;
         `);
 
@@ -111,23 +111,23 @@ export class FitmentService {
             .field('v.id', 'id')
             .field('model')
             .field(`
-            json_build_object('id', m.key, 'name', COLAESCE(m.name->>'${locale}', m.name->>'${FitmentService.fallbackLocale}'), 'logo', m.logo, 'description', '')
+            json_build_object('id', m.key, 'name', COALESCE(m.name->>'${locale}', m.name->>'${FitmentService.fallbackLocale}'), 'logo', m.logo, 'description', '')
             `, 'manufacturer')
             .field('platform')
             .field('hsntsn', '"hsntsnRaw"')
             .field('null', 'tmps')
-            .field(`COLAESCE(st.value->>'${locale}', st.value->>'${FitmentService.fallbackLocale}')`, 'segment')
-            .field(`COLAESCE(ft.value->>'${locale}', ft.value->>'${FitmentService.fallbackLocale}')`, 'bodyCategory')
+            .field(`COALESCE(st.value->>'${locale}', st.value->>'${FitmentService.fallbackLocale}')`, 'segment')
+            .field(`COALESCE(ft.value->>'${locale}', ft.value->>'${FitmentService.fallbackLocale}')`, 'bodyCategory')
             .field(`json_build_object('month', "startBuildMonth"::text, 'year', "startBuildYear"::text)`, 'from')
             .field(`json_build_object('month', "endBuildMonth"::text, 'year', "endBuildYear"::text)`, 'to')
             .field(`json_build_object(
                 'id', fuelt.key,
-                'name', COLAESCE(fuelt.value->>'${locale}', fuelt.value->>'${FitmentService.fallbackLocale}')
+                'name', COALESCE(fuelt.value->>'${locale}', fuelt.value->>'${FitmentService.fallbackLocale}')
             )`, 'energyType')
             .field(`
             json_build_object(
                 'cubicCapacity', volume::text,
-                'description', COLAESCE("engineDescription"->>'${locale}', "engineDescription"->>'${FitmentService.fallbackLocale}'),
+                'description', COALESCE("engineDescription"->>'${locale}', "engineDescription"->>'${FitmentService.fallbackLocale}'),
                 'size', json_build_object('kw', "engineSizeKw"::text, 'ps', '')
             )`, 'engine')
             .field('"maxSpeed"', '"maxSpeedKm"')
