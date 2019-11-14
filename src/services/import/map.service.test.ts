@@ -12,7 +12,7 @@ const db = {
         }),
 };
 
-describe('src/services/import/import.service', () => {
+describe('src/services/import/map.service', () => {
     beforeAll(() => {
         injectCache.delete('PG');
         injectStore.set('PG', {
@@ -92,7 +92,7 @@ describe('src/services/import/import.service', () => {
             expect(result.fuelId).toEqual('fuel');
             expect(result.segmentId).toEqual('segment');
             expect(result.formatId).toEqual('format');
-            expect(result.hsntsn).toEqual([[320, 150]]);
+            expect(result.hsntsn).toEqual([['320', '150']]);
         });
 
         it('Should request dictionary value by locale', () => {

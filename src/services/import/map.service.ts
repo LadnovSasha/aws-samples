@@ -1,7 +1,7 @@
 import {
     IImportFitment, IVehicle, IFitment,
 } from 'fitment-interface';
-import { Injectable, Inject } from 'lambda-core';
+import { Injectable, Inject, SapService } from 'lambda-core';
 import { PoolClient } from 'pg';
 import { transliterate } from 'transliteration';
 import { DictionaryTables } from './map.service.interface';
@@ -55,8 +55,7 @@ export class MapService {
     unmarshalHsnTsn(raw: string) {
         return raw.split(',').map((row: string) => {
             const hsntsn = row
-                .split(' ')
-                .map(x => Number.parseInt(x, 10));
+                .split(' ');
             return hsntsn;
         });
     }
@@ -66,6 +65,7 @@ export class MapService {
             id: raw.vehicleId,
             hsntsn: this.unmarshalHsnTsn(raw.hsntsn),
             countries: [this.country],
+            tpms: SapService.unmarshalBoolean(raw.pressureMonitoringSystem),
             model: raw.model,
             manufacturer: await this.checkAndGetManufacturer(raw.manufacturer, raw.imageName),
             platform: raw.platform,
@@ -127,6 +127,7 @@ export class MapService {
                     rim: raw.frontRim,
                     loadIndex: frontLoadIndex.loadIndex,
                     loadIndex2: frontLoadIndex.loadIndex2,
+                    speedIndex: raw.frontSpeedIndex,
                     aspectRatio: raw.frontHeight,
                 },
                 rear: {
@@ -135,6 +136,8 @@ export class MapService {
                     loadIndex: rearLoadIndex.loadIndex,
                     loadIndex2: rearLoadIndex.loadIndex2,
                     aspectRatio: raw.rearHeight,
+                    speedIndex: raw.rearSpeedIndex,
+
                 },
             },
         };

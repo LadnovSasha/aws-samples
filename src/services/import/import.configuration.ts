@@ -87,7 +87,7 @@ export const fitmentConfiguration = [{
 }, {
     source: 'TirePressureMonitoringsystem',
     target: 'pressureMonitoringSystem',
-    format: ParseService.numberFormat,
+    format: ParseService.stringFormat,
 }, {
     source: 'FrontWidth',
     target: 'frontWidth',
@@ -125,8 +125,8 @@ export const fitmentConfiguration = [{
     target: 'rearRim',
     format: ParseService.numberFormat,
 }, {
-    source: 'RearLoadindex',
-    target: 'rearLoadindex',
+    source: 'RearLoadIndex',
+    target: 'rearLoadIndex',
     format: ParseService.stringFormat,
 }, {
     source: 'RearSpeedIndex',

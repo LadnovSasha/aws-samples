@@ -115,7 +115,7 @@ export class FitmentService {
             `, 'manufacturer')
             .field('platform')
             .field('hsntsn', '"hsntsnRaw"')
-            .field('null', 'tmps')
+            .field('tpms')
             .field(`COALESCE(st.value->>'${locale}', st.value->>'${FitmentService.fallbackLocale}')`, 'segment')
             .field(`COALESCE(ft.value->>'${locale}', ft.value->>'${FitmentService.fallbackLocale}')`, 'bodyCategory')
             .field(`json_build_object('month', "startBuildMonth"::text, 'year', "startBuildYear"::text)`, 'from')
