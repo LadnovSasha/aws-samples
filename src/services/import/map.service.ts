@@ -137,7 +137,6 @@ export class MapService {
                     loadIndex2: rearLoadIndex.loadIndex2,
                     aspectRatio: raw.rearHeight,
                     speedIndex: raw.rearSpeedIndex,
-
                 },
             },
         };
