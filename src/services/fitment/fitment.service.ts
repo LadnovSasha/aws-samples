@@ -77,10 +77,11 @@ export class FitmentService {
 
         const { text, values } = sqlQuery.toParam();
         const { rows } = await db!.query<IVehicleRaw>(text, values);
+        const includeFitments = query.model || query.year || query.energyType;
         const promises = rows.map(async vehicle =>
             FitmentService.unmarshalVehicleResponse(
                 vehicle,
-                await this.getFitmentsByVehicle(vehicle.id),
+                includeFitments ? await this.getFitmentsByVehicle(vehicle.id) : [],
             ),
         );
 
