@@ -61,6 +61,7 @@ export class MapService {
     }
 
     async unmarshalVehicle(raw: IImportFitment): Promise<IVehicle> {
+        const kwToPsKoeff = 1.35962;
         return {
             id: raw.vehicleId,
             hsntsn: this.unmarshalHsnTsn(raw.hsntsn),
@@ -80,6 +81,7 @@ export class MapService {
                 [this.locale]: raw.engineDescription,
             },
             engineSizeKw: raw.engineSizeKW,
+            engineSizePs: Number.parseInt((raw.engineSizeKW! * kwToPsKoeff).toFixed(0), 10),
             formatId: await this.getDictionaryKey(DictionaryTables.FORMAT, raw.format),
             maxSpeed: raw.maxSpeed,
             weight: raw.weight,

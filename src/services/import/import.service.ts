@@ -132,7 +132,8 @@ export class ImportService {
                     SELECT unnest(countries || excluded.countries) from ${this.vehicleTable} where id = excluded.id
                 ) as s1
             ),
-            "engineDescription" = ${this.vehicleTable}."engineDescription" || excluded."engineDescription"
+            "engineDescription" = ${this.vehicleTable}."engineDescription" || excluded."engineDescription",
+            tpms = excluded.tpms, "engineSizePs" = excluded."engineSizePs"
         `;
         const { text, values } = this.squel.insert(this.squelOptions)
             .into(this.vehicleTable)

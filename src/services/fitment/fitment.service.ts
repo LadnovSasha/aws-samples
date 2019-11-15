@@ -129,7 +129,7 @@ export class FitmentService {
             json_build_object(
                 'cubicCapacity', volume::text,
                 'description', COALESCE("engineDescription"->>'${locale}', "engineDescription"->>'${FitmentService.fallbackLocale}'),
-                'size', json_build_object('kw', "engineSizeKw"::text, 'ps', '')
+                'size', json_build_object('kw', "engineSizeKw"::text, 'ps', "engineSizePs"::text)
             )`, 'engine')
             .field('"maxSpeed"', '"maxSpeedKm"')
             .field('weight::text', 'weight')
@@ -154,7 +154,7 @@ export class FitmentService {
                 'sizeInch', COALESCE((dimensions->'front'->'widthInch')::text, ''),
                 'aspectRatio', COALESCE((dimensions->'front'->'aspectRatio')::text, ''),
                 'rim', COALESCE((dimensions->'front'->'rim')::text, ''),
-                'speedIndex', COALESCE((dimensions->'front'->'speedIndex')::text, ''),
+                'speedIndex', COALESCE(dimensions->'front'->>'speedIndex', ''),
                 'loadIndex', COALESCE((dimensions->'front'->'loadIndex')::text, ''),
                 'loadIndex2', COALESCE((dimensions->'front'->'loadIndex2')::text, ''),
                 'normalPressure', "normalPressure"->'front',
@@ -165,7 +165,7 @@ export class FitmentService {
                 'sizeInch', COALESCE((dimensions->'rear'->'widthInch')::text, ''),
                 'aspectRatio', COALESCE((dimensions->'rear'->'aspectRatio')::text, ''),
                 'rim', COALESCE((dimensions->'rear'->'rim')::text, ''),
-                'speedIndex', COALESCE((dimensions->'rear'->'speedIndex')::text, ''),
+                'speedIndex', COALESCE(dimensions->'rear'->>'speedIndex', ''),
                 'loadIndex', COALESCE((dimensions->'rear'->'loadIndex')::text, ''),
                 'loadIndex2', COALESCE((dimensions->'rear'->'loadIndex2')::text, ''),
                 'normalPressure', "normalPressure"->'rear',
@@ -187,7 +187,9 @@ export class FitmentService {
             const equal = frontDimension.sizeMM === rearDimension.sizeMM &&
                 frontDimension.sizeInch === rearDimension.sizeInch &&
                 frontDimension.rim === rearDimension.rim &&
-                frontDimension.aspectRatio === rearDimension.aspectRatio;
+                frontDimension.aspectRatio === rearDimension.aspectRatio &&
+                frontDimension.speedIndex === rearDimension.speedIndex &&
+                frontDimension.loadIndex === rearDimension.loadIndex;
 
             return {
                 frontDimension,
