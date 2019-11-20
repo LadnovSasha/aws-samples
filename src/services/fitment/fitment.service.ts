@@ -25,7 +25,7 @@ export class FitmentService {
         const { rows } = await db!.query(`
             Select
                 key as id, COALESCE(name->'${locale}', name->'${FitmentService.fallbackLocale}') as name, logo as "logoUrl"
-            FROM manufacturers;
+            FROM manufacturers ORDER BY name ASC;
         `);
 
         return rows;
