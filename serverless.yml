@@ -31,7 +31,7 @@ provider:
         - "*"
 
 plugins:
-  - '@hewmen/serverless-plugin-typescript'
+  - serverless-plugin-typescript
   - serverless-offline
   - serverless-plugin-warmup
   - serverless-plugin-warmup-ts-adapter
