@@ -31,10 +31,10 @@ provider:
         - "*"
 
 plugins:
+  - serverless-plugin-warmup-ts-bridge
+  - serverless-plugin-warmup
   - serverless-plugin-typescript
   - serverless-offline
-  - serverless-plugin-warmup
-  - serverless-plugin-warmup-ts-adapter
   - serverless-aws-documentation
   - serverless-reqvalidator-plugin
   - serverless-openapi-documentation
@@ -50,8 +50,6 @@ package:
   - src/**/!(*.spec).js
   - migrations/**/*
   - mock/**/*
-  - _warmup/index.js  # HACK! Typescript requires lambda handler files to be with extension *.ts.
-                      # Here overriding _warmup/index.js  to the .build dir
   exclude:
   - src/**/*.ts
 
