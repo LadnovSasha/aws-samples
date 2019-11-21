@@ -12,3 +12,5 @@ pg_password="${bamboo_fitment_lambda_prod_pg_password}"
 serverless_salt="${bamboo_fitment_lambda_prod_salt}"
 vpcsecuritygroup="${bamboo_fitment_lambda_prod_vpcsecuritygroup}"
 vpcsubnet="${bamboo_fitment_lambda_prod_vpcsubnet}"
+
+nautilusbrowserapikey="${bamboo_fitment_lambda_prod_nautilusbrowserapikey}"
