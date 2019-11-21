@@ -8,3 +8,4 @@ test-report.json
 .serverless
 .build
 .vscode
+_warmup
