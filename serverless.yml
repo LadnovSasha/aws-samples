@@ -31,10 +31,10 @@ provider:
         - "*"
 
 plugins:
-  - serverless-plugin-warmup-ts-bridge
-  - serverless-plugin-warmup
   - serverless-plugin-typescript
   - serverless-offline
+  - serverless-plugin-warmup-ts-bridge
+  - serverless-plugin-warmup
   - serverless-aws-documentation
   - serverless-reqvalidator-plugin
   - serverless-openapi-documentation
