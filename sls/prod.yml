@@ -66,6 +66,9 @@ Resources:
       MasterUserPassword: ${opt:pg-password}
       DBName: fitment
       Engine: postgres
+      DBSubnetGroupName: ${opt:dbSubnetGroup, 'gaas-prod'}
+      VPCSecurityGroups:
+        - ${opt:vpcSecurityGroup}
   FitmentImportQueue:
     Type: AWS::SQS::Queue
     Properties:
