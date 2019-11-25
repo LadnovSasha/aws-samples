@@ -83,7 +83,7 @@ Resources:
       MasterUserPassword: ${opt:pg-password, "developerSuperPWD"}
       DBName: fitment
       Engine: postgres
-      DBSubnetGroupName: ${opt:dbSubnetGroup, 'gaas'}
+      DBSubnetGroupName: ${opt:dbSubnetGroup, 'gaas-staging'}
       VPCSecurityGroups:
         - ${opt:vpcSecurityGroup, 'sg-0ebc272711a0bb87a'}
   FitmentSizeLambdaNautilusUsagePlanKey:
