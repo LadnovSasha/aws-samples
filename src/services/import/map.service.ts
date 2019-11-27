@@ -65,6 +65,7 @@ export class MapService {
         return {
             id: raw.vehicleId,
             hsntsn: this.unmarshalHsnTsn(raw.hsntsn),
+            code: raw.model.toLowerCase().replace(' ', '-').replace(/[^A-Za-z0-9-]/ig, '_'),
             countries: [this.country],
             tpms: SapService.unmarshalBoolean(raw.pressureMonitoringSystem),
             model: raw.model,
@@ -103,6 +104,7 @@ export class MapService {
         `, [name]);
 
         if (rows.length === 0) {
+            console.log(type, name, this.locale);
             throw new Error('Unsupported locale or dictionary value');
         }
 

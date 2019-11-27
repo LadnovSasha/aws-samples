@@ -60,7 +60,7 @@
     "ts-jest": "^23.10.5",
     "tslint": "^5.20.0",
     "tslint-config-airbnb": "^5.11.2",
-    "typescript": "^3.6.4"
+    "typescript": "^3.7.2"
   },
   "author": "Goodyear as a Service",
   "license": "ISC",

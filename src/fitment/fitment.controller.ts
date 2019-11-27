@@ -6,7 +6,8 @@ import { FitmentService } from '../services/fitment/fitment.service';
 import {
     IManufacturersPathRequest, IManufacturersQueryRequest,
     IVehicleByIdPathRequest, IVehicleByIdQueryRequest,
-    IVehicleByMakePathRequest, IVehicleByMakeQueryRequest, IVehicleByHsnTsnPathRequest, IVehicleByHsnTsnQueryRequest,
+    IVehicleByMakePathRequest, IVehicleByMakeQueryRequest, IVehicleByHsnTsnPathRequest,
+    IVehicleByHsnTsnQueryRequest, IVehicleCodesByMakePathRequest, IVehicleCodesByMakeQueryRequest,
 } from 'fitment-interface';
 
 export class FitmentController extends Controller {
@@ -101,5 +102,16 @@ export class FitmentController extends Controller {
         }, []);
 
         return this.getResponse().ok(matchedVehicles);
+    }
+
+    @Injectable()
+    @Resource()
+    async getCarModelsByMake(
+        @Inject('FitmentService') service?: FitmentService,
+    ) {
+        const { country, make }: IVehicleCodesByMakePathRequest = this.getPathParams();
+        const query: IVehicleCodesByMakeQueryRequest = this.getQueryParams();
+        const response = await service?.getVehicleCodesByMake(country, make, query));
+        return this.getResponse().ok(response);
     }
 }

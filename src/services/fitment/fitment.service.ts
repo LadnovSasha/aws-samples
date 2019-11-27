@@ -5,8 +5,10 @@ import {
     IManufacturersResponse, IFitmentResponse, IVehicleFitmentsResponse,
     IFitmentsResponse, IHsnTsn,
     IVehicleByMakeQueryRequest,
+    IVehicleCodesByMakeQueryRequest,
 } from 'fitment-interface';
 import { IVehicleRaw } from './fitment.service.interface';
+import { format } from 'path';
 const omit = require('lodash.omit');
 
 export class FitmentService {
@@ -52,6 +54,35 @@ export class FitmentService {
         );
 
         return await Promise.all(promises);
+    }
+
+    @Injectable()
+    async getVehicleCodesByMake(
+        country: string,
+        make: string,
+        query: IVehicleCodesByMakeQueryRequest,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ) {
+        const sqlQuery = this.squel.select()
+            .from(this.vehiclesTable)
+            .field('code')
+            .field('model')
+            .where('model = ?', make)
+            .where('? = ANY (v.countries)', country);
+
+        if (query?.energyType) {
+            sqlQuery.where('fuelId = ?', query.energyType);
+        }
+
+        if (query?.year) {
+            sqlQuery.where('startBuildYear = ?', query.year);
+        }
+
+        // TODO: Add Language handling
+
+        const { text, values } = sqlQuery.toParam();
+        const { rows } = await db!.query<{code: string, model: string}>(text, values);
+        return rows;
     }
 
     @Injectable()
