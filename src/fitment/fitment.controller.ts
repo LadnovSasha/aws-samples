@@ -1,6 +1,6 @@
 import {
     Controller, Resource, Injectable,
-    Inject, MockService,
+    Inject, MockService, ResponseCode,
 } from 'lambda-core';
 import { FitmentService } from '../services/fitment/fitment.service';
 import {
@@ -9,6 +9,10 @@ import {
     IVehicleByMakePathRequest, IVehicleByMakeQueryRequest, IVehicleByHsnTsnPathRequest,
     IVehicleByHsnTsnQueryRequest, IVehicleCodesByMakePathRequest, IVehicleCodesByMakeQueryRequest,
 } from 'fitment-interface';
+
+const responseHeaders = {
+    'Cache-Control': `public, max-age=${60 * 60 * 24}`,
+};
 
 export class FitmentController extends Controller {
     @Injectable()
@@ -30,8 +34,10 @@ export class FitmentController extends Controller {
     ) {
         const { country, make } = this.getPathParams<IVehicleByMakePathRequest>();
         const query = this.getQueryParams<IVehicleByMakeQueryRequest>();
-        return this.getResponse().ok(
+        return this.getResponse().general(
+            ResponseCode.OK,
             await service!.getVehiclesByMake(country, make, query),
+            responseHeaders,
         );
     }
 
@@ -43,7 +49,7 @@ export class FitmentController extends Controller {
         const { vehicleId, country } = this.getPathParams<IVehicleByIdPathRequest>();
         const { language } = this.getQueryParams<IVehicleByIdQueryRequest>();
         const response = await service!.getVehicleById(country, vehicleId, language);
-        return response ? this.getResponse().ok(response) : this.getResponse().notFound('Requested vehicle not found');
+        return response ? this.getResponse().general(ResponseCode.OK, response, responseHeaders) : this.getResponse().notFound('Requested vehicle not found');
     }
 
     @Injectable()
@@ -53,8 +59,10 @@ export class FitmentController extends Controller {
     ) {
         const { hsn, tsn, country } = this.getPathParams<IVehicleByHsnTsnPathRequest>();
         const { language } = this.getPathParams<IVehicleByHsnTsnQueryRequest>();
-        return this.getResponse().ok(
+        return this.getResponse().general(
+            ResponseCode.OK,
             await service!.getVehiclesByHsnTsn(country, { hsn, tsn }, language),
+            responseHeaders,
         );
     }
 
@@ -112,6 +120,6 @@ export class FitmentController extends Controller {
         const { country, make }: IVehicleCodesByMakePathRequest = this.getPathParams();
         const query: IVehicleCodesByMakeQueryRequest = this.getQueryParams();
         const response = await service!.getVehicleCodesByMake(country, make, query);
-        return this.getResponse().ok(response);
+        return this.getResponse().general(ResponseCode.OK, response, responseHeaders);
     }
 }

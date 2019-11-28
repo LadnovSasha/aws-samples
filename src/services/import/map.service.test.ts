@@ -140,4 +140,40 @@ describe('src/services/import/map.service', () => {
             });
         });
     });
+
+    describe('static fitmentsEqual()', () => {
+        it('Should return true if wheels are equal', () => {
+            const equal = MapService.fitmentsEqual({
+                frontHeight: 1,
+                rearHeight: 1,
+                frontWidth: 2,
+                rearWidth: 2,
+                frontLoadIndex: 3,
+                rearLoadIndex: 3,
+                frontSpeedIndex: 4,
+                rearSpeedIndex: 4,
+                frontRim: 5,
+                rearRim: 5,
+            } as any);
+
+            expect(equal).toBeTruthy();
+        });
+
+        it('Should return false if not equal', () => {
+            const equal = MapService.fitmentsEqual({
+                frontHeight: 1,
+                rearHeight: 1,
+                frontWidth: 2,
+                rearWidth: 2,
+                frontLoadIndex: 3,
+                rearLoadIndex: 3,
+                frontSpeedIndex: 4,
+                rearSpeedIndex: 4,
+                frontRim: 4,
+                rearRim: 5,
+            } as any);
+
+            expect(equal).toBeFalsy();
+        });
+    });
 });

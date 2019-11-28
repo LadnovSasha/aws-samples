@@ -2,12 +2,12 @@ import { Injectable, Inject } from 'lambda-core';
 import * as squel from 'squel';
 import { PoolClient } from 'pg';
 import {
-    IManufacturersResponse, IFitmentResponse, IVehicleFitmentsResponse,
-    IFitmentsResponse, IHsnTsn,
+    IManufacturersResponse, IVehicleFitmentsResponse,
+    IHsnTsn,
     IVehicleByMakeQueryRequest,
     IVehicleCodesByMakeQueryRequest,
 } from 'fitment-interface';
-import { IVehicleRaw } from './fitment.service.interface';
+import { IVehicleRaw, IVehicleFitmentsRaw } from './fitment.service.interface';
 const omit = require('lodash.omit');
 
 export class FitmentService {
@@ -41,18 +41,15 @@ export class FitmentService {
     ): Promise<IVehicleFitmentsResponse[]> {
         const locale = this.buildLocale(country, language);
         const hsntsnValue = [hsntsn.hsn, hsntsn.tsn].join(',');
-        const { text, values } = this.getBaseVehicleRequest(locale, country)
+        const baseQuery = this.getBaseVehicleRequest(locale, country);
+        const { text, values } = this.getFitmentsRequest(baseQuery)
             .where('? = ANY (v.hsntsn)', hsntsnValue).toParam();
 
-        const { rows } = await db!.query<IVehicleRaw>(text, values);
-        const promises = rows.map(async vehicle =>
-            FitmentService.unmarshalVehicleResponse(
-                vehicle,
-                await this.getFitmentsByVehicle(vehicle.id),
-            ),
-        );
+        const { rows } = await db!.query<IVehicleFitmentsRaw>(text, values);
 
-        return await Promise.all(promises);
+        return rows.map(vehicle =>
+            FitmentService.unmarshalVehicleResponse(vehicle),
+        );
     }
 
     @Injectable()
@@ -109,17 +106,13 @@ export class FitmentService {
             sqlQuery.where('v."startBuildYear" = ?', query.year);
         }
 
-        const { text, values } = sqlQuery.toParam();
-        const { rows } = await db!.query<IVehicleRaw>(text, values);
         const includeFitments = query.model || query.year || query.energyType;
-        const promises = rows.map(async vehicle =>
-            FitmentService.unmarshalVehicleResponse(
-                vehicle,
-                includeFitments ? await this.getFitmentsByVehicle(vehicle.id) : [],
-            ),
-        );
+        const { text, values } = includeFitments ? this.getFitmentsRequest(sqlQuery).toParam() : sqlQuery.toParam();
+        const { rows } = await db!.query<IVehicleFitmentsRaw | IVehicleRaw>(text, values);
 
-        return await Promise.all(promises);
+        return rows.map(
+            vehicle => FitmentService.unmarshalVehicleResponse(vehicle),
+        );
     }
 
     @Injectable()
@@ -130,15 +123,15 @@ export class FitmentService {
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<IVehicleFitmentsResponse | undefined> {
         const locale = language || FitmentService.fallbackLocale;
-        const { text, values } = this.getBaseVehicleRequest(locale, country)
+        const baseQuery = this.getBaseVehicleRequest(locale, country);
+        const { text, values } = this.getFitmentsRequest(baseQuery)
             .where('v.id = ?', vehicleId).toParam();
-        const { rows } = await db!.query<IVehicleRaw>(text, values);
+        const { rows } = await db!.query<IVehicleFitmentsRaw>(text, values);
 
         if (rows.length === 0) {
             return;
         }
-        const fitments = await this.getFitmentsByVehicle(vehicleId);
-        return FitmentService.unmarshalVehicleResponse(rows[0], fitments);
+        return FitmentService.unmarshalVehicleResponse(rows[0]);
     }
 
     protected getBaseVehicleRequest(locale: string, country: string) {
@@ -176,67 +169,51 @@ export class FitmentService {
             .left_join('fueltypes', 'fuelt', '"fuelId" = fuelt.key');
     }
 
-    @Injectable()
-    protected async getFitmentsByVehicle(
-        vehicleId: string,
-        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
-    ) {
-        const { rows } = await db!.query(`
-        Select
-            json_build_object(
-                'sizeMM', COALESCE((dimensions->'front'->'widthMM')::text, ''),
-                'sizeInch', COALESCE((dimensions->'front'->'widthInch')::text, ''),
-                'aspectRatio', COALESCE((dimensions->'front'->'aspectRatio')::text, ''),
-                'rim', COALESCE((dimensions->'front'->'rim')::text, ''),
-                'speedIndex', COALESCE(dimensions->'front'->>'speedIndex', ''),
-                'loadIndex', COALESCE((dimensions->'front'->'loadIndex')::text, ''),
-                'loadIndex2', COALESCE((dimensions->'front'->'loadIndex2')::text, ''),
-                'normalPressure', "normalPressure"->'front',
-                'highwayPressure', "highwayPressure"->'front'
-            ) as "frontDimension",
-            json_build_object(
-                'sizeMM', COALESCE((dimensions->'rear'->'widthMM')::text, ''),
-                'sizeInch', COALESCE((dimensions->'rear'->'widthInch')::text, ''),
-                'aspectRatio', COALESCE((dimensions->'rear'->'aspectRatio')::text, ''),
-                'rim', COALESCE((dimensions->'rear'->'rim')::text, ''),
-                'speedIndex', COALESCE(dimensions->'rear'->>'speedIndex', ''),
-                'loadIndex', COALESCE((dimensions->'rear'->'loadIndex')::text, ''),
-                'loadIndex2', COALESCE((dimensions->'rear'->'loadIndex2')::text, ''),
-                'normalPressure', "normalPressure"->'rear',
-                'highwayPressure', "highwayPressure"->'rear'
-            ) as "rearDimension"
-        FROM fitments WHERE "vehicleId" = $1;
-        `, [vehicleId]);
-
-        return FitmentService.unmarshalFitments(rows);
+    protected getFitmentsRequest(squel: squel.PostgresSelect) {
+        return squel
+            .field(`
+            json_agg(
+                json_build_object(
+                    'mixedFitment', fitments.dimensions->'mixedFitment',
+                    'frontDimension', json_build_object(
+                        'sizeMM', COALESCE((fitments.dimensions->'front'->'widthMM')::text, ''),
+                        'sizeInch', COALESCE((fitments.dimensions->'front'->'widthInch')::text, ''),
+                        'aspectRatio', COALESCE((fitments.dimensions->'front'->'aspectRatio')::text, ''),
+                        'rim', COALESCE((fitments.dimensions->'front'->'rim')::text, ''),
+                        'speedIndex', COALESCE(fitments.dimensions->'front'->>'speedIndex', ''),
+                        'loadIndex', COALESCE((fitments.dimensions->'front'->'loadIndex')::text, ''),
+                        'loadIndex2', COALESCE((fitments.dimensions->'front'->'loadIndex2')::text, ''),
+                        'normalPressure', fitments."normalPressure"->'front',
+                        'highwayPressure', fitments."highwayPressure"->'front'
+                    ),
+                    'rearDimension', json_build_object(
+                        'sizeMM', COALESCE((fitments.dimensions->'rear'->'widthMM')::text, ''),
+                        'sizeInch', COALESCE((fitments.dimensions->'rear'->'widthInch')::text, ''),
+                        'aspectRatio', COALESCE((fitments.dimensions->'rear'->'aspectRatio')::text, ''),
+                        'rim', COALESCE((fitments.dimensions->'rear'->'rim')::text, ''),
+                        'speedIndex', COALESCE(fitments.dimensions->'rear'->>'speedIndex', ''),
+                        'loadIndex', COALESCE((fitments.dimensions->'rear'->'loadIndex')::text, ''),
+                        'loadIndex2', COALESCE((fitments.dimensions->'rear'->'loadIndex2')::text, ''),
+                        'normalPressure', fitments."normalPressure"->'rear',
+                        'highwayPressure', fitments."highwayPressure"->'rear'
+                    )
+                )
+            )`, 'fitments')
+            .left_join('fitments', 'fitments', 'v.id = fitments."vehicleId"')
+            .group('v.id')
+            .group('m.key')
+            .group('st.key')
+            .group('ft.key')
+            .group('fuelt.key');
     }
 
     protected buildLocale(country: string, language?: string) {
         return `${country}_${language}`;
     }
 
-    static unmarshalFitments(fitments: IFitmentResponse[]): IFitmentResponse[] {
-        return fitments.map((fitment) => {
-            const { frontDimension, rearDimension } = fitment;
-            const equal = frontDimension.sizeMM === rearDimension.sizeMM &&
-                frontDimension.sizeInch === rearDimension.sizeInch &&
-                frontDimension.rim === rearDimension.rim &&
-                frontDimension.aspectRatio === rearDimension.aspectRatio &&
-                frontDimension.speedIndex === rearDimension.speedIndex &&
-                frontDimension.loadIndex === rearDimension.loadIndex;
-
-            return {
-                frontDimension,
-                rearDimension,
-                mixedFitment: !equal,
-            };
-        });
-    }
-
-    static unmarshalVehicleResponse(vehicle: IVehicleRaw, fitments: IFitmentsResponse): IVehicleFitmentsResponse {
+    static unmarshalVehicleResponse(vehicle: IVehicleFitmentsRaw): IVehicleFitmentsResponse {
         return {
             ...omit(vehicle, ['maxSpeedKm', 'hsntsnRaw']),
-            fitments,
             hsntsn: vehicle.hsntsnRaw.map((hsntsn: string) => {
                 const [hsn, tsn] = hsntsn.split(',');
                 return { hsn, tsn };

@@ -32,6 +32,7 @@ provider:
 
 plugins:
   - serverless-plugin-typescript
+  - serverless-api-compression
   - serverless-offline
   - serverless-plugin-warmup-ts-bridge
   - serverless-plugin-warmup
@@ -255,6 +256,7 @@ functions:
             responseModels:
               "application/json": HealthStatusResponse
 custom:
+  contentCompression: 100
   warmup:
     cleanFolder: false
     timeout: 30

@@ -71,7 +71,7 @@ describe('src/services/import/import.service', () => {
             const [, values] = dbMock.query.getCall(5).args;
             expect(values).toEqual([
                 '00354000001600354', 'P00000100000016', '{"front":2.8,"rear":2.6}', '{"front":2.6,"rear":2.2}',
-                '{"front":{"widthMM":175,"rim":14,"loadIndex":82,"speedIndex":"H","aspectRatio":65},"rear":{"widthMM":175,"rim":14,"loadIndex":82,"aspectRatio":65,"speedIndex":"H"}}',
+                '{"mixedFitment":true,"front":{"widthMM":175,"rim":14,"loadIndex":82,"speedIndex":"H","aspectRatio":65},"rear":{"widthMM":175,"rim":14,"loadIndex":82,"aspectRatio":65,"speedIndex":"H"}}',
             ]);
         });
     });

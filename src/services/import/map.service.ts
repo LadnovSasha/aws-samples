@@ -125,6 +125,7 @@ export class MapService {
                 rear: raw.normalPressureRear,
             },
             dimensions: {
+                mixedFitment: MapService.fitmentsEqual(raw),
                 front: {
                     ...MapService.getWidthInDimensions(raw.frontWidth),
                     rim: raw.frontRim,
@@ -143,6 +144,14 @@ export class MapService {
                 },
             },
         };
+    }
+
+    static fitmentsEqual(raw: IImportFitment): boolean {
+        return raw.frontHeight === raw.rearHeight &&
+            raw.frontWidth === raw.rearWidth &&
+            raw.frontLoadIndex === raw.rearLoadIndex &&
+            raw.frontSpeedIndex === raw.rearSpeedIndex &&
+            raw.frontRim === raw.rearRim;
     }
 
     static getWidthInDimensions(width: number) {
