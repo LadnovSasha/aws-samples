@@ -104,7 +104,6 @@ export class MapService {
         `, [name]);
 
         if (rows.length === 0) {
-            console.log(type, name, this.locale);
             throw new Error('Unsupported locale or dictionary value');
         }
 
