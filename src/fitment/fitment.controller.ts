@@ -106,12 +106,12 @@ export class FitmentController extends Controller {
 
     @Injectable()
     @Resource()
-    async getCarModelsByMake(
+    async getCarCodesByMake(
         @Inject('FitmentService') service?: FitmentService,
     ) {
         const { country, make }: IVehicleCodesByMakePathRequest = this.getPathParams();
         const query: IVehicleCodesByMakeQueryRequest = this.getQueryParams();
-        const response = await service?.getVehicleCodesByMake(country, make, query));
+        const response = await service!.getVehicleCodesByMake(country, make, query);
         return this.getResponse().ok(response);
     }
 }

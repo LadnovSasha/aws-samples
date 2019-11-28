@@ -2,6 +2,7 @@ import * as sinon from 'sinon';
 import { injectCache, injectStore } from 'lambda-core';
 const vehiclesMock = require('../../mock/vehicles.json');
 const manufacturersMock = require('../../mock/manufacturers.json');
+const vehicleCodesMock = [{ code: 'test', model: 'test' }];
 
 const sandbox = sinon.createSandbox();
 const fitmentMock = {
@@ -9,6 +10,7 @@ const fitmentMock = {
     getVehiclesByMake: sandbox.stub().resolves([{ id: 'vehicleId' }]),
     getVehicleById: sandbox.stub().resolves({ id: 'vehicleId' }),
     getVehiclesByHsnTsn:    sandbox.stub().resolves([{ id: 'vehicleId' }]),
+    getVehicleCodesByMake:    sandbox.stub().resolves(vehicleCodesMock),
 };
 
 describe('src/fitment/fitment.controller', () => {
@@ -193,6 +195,32 @@ describe('src/fitment/fitment.controller', () => {
                 httpMethod: 'get',
             }, {}, null);
             expect(statusCode).toEqual(200);
+        });
+    });
+
+    describe('getCarCodesByMake()', () => {
+
+        it('Should return a list of vehicles codes', async () => {
+            const { body, statusCode } = await controller.getCarCodesByMake({
+                pathParameters: { country: 'de', make: 'audi' },
+                headers: {},
+                httpMethod: 'get',
+            }, {}, null);
+
+            expect({ statusCode, body }).toEqual({
+                statusCode: 200,
+                body: JSON.stringify(vehicleCodesMock),
+            });
+        });
+
+        it('Should call with path params', async () => {
+            await controller.getCarCodesByMake({
+                pathParameters: { country: 'de', make: 'audi' },
+                headers: {},
+                httpMethod: 'get',
+            }, {}, null);
+
+            expect(fitmentMock.getVehicleCodesByMake.calledOnceWith('de', 'audi', {})).toBeTruthy;
         });
     });
 });

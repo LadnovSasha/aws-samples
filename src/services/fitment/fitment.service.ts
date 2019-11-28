@@ -8,7 +8,6 @@ import {
     IVehicleCodesByMakeQueryRequest,
 } from 'fitment-interface';
 import { IVehicleRaw } from './fitment.service.interface';
-import { format } from 'path';
 const omit = require('lodash.omit');
 
 export class FitmentService {
@@ -60,25 +59,29 @@ export class FitmentService {
     async getVehicleCodesByMake(
         country: string,
         make: string,
-        query: IVehicleCodesByMakeQueryRequest,
+        query?: IVehicleCodesByMakeQueryRequest,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ) {
+
+        const locale = query && query?.language
+            ? this.buildLocale(country, query?.language)
+            : FitmentService.fallbackLocale;
+
         const sqlQuery = this.squel.select()
-            .from(this.vehiclesTable)
             .field('code')
-            .field('model')
-            .where('model = ?', make)
-            .where('? = ANY (v.countries)', country);
+            .field(`m.name->>'${locale}'`, 'model')
+            .from(this.vehiclesTable, 'v')
+            .left_join('manufacturers', 'm', 'manufacturer = m.key')
+            .where('? = ANY (v.countries)', country)
+            .where('v.manufacturer = ?', make);
 
         if (query?.energyType) {
-            sqlQuery.where('fuelId = ?', query.energyType);
+            sqlQuery.where('v."fuelId" = ?', query.energyType);
         }
 
         if (query?.year) {
-            sqlQuery.where('startBuildYear = ?', query.year);
+            sqlQuery.where('v."startBuildYear" = ?', query.year);
         }
-
-        // TODO: Add Language handling
 
         const { text, values } = sqlQuery.toParam();
         const { rows } = await db!.query<{code: string, model: string}>(text, values);

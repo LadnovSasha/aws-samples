@@ -235,8 +235,8 @@ functions:
             description: Returned when the operation is completed successfully.
             responseModels:
               "application/json": HealthStatusResponse
-  getCarModelsByMake:
-    handler: src/fitment/handler.getCarModelsByMake
+  getCarCodesByMake:
+    handler: src/fitment/handler.getCarCodesByMake
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
     private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
