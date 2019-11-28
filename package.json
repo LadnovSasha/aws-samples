@@ -21,6 +21,7 @@
   "dependencies": {
     "aws-xray-sdk": "^2.4.0",
     "csv-parse": "^4.6.3",
+    "fitment-interface": "^2.0.7",
     "lambda-core": "2.0.6",
     "lodash.omit": "^4.5.0",
     "pg": "^7.12.1",
@@ -41,7 +42,6 @@
     "@types/sinon": "^7.5.0",
     "@types/uuid": "^3.4.5",
     "aws-sdk": "^2.546.0",
-    "fitment-interface": "^2.0.4",
     "jest": "^24.8.0",
     "jest-bamboo-reporter": "^1.2.0",
     "request-promise": "^4.2.4",
