@@ -198,7 +198,7 @@ describe('src/services/fitment/fitment.service', () => {
             injectStore.set('PG', {
                 create: () => Promise.resolve(pg),
             });
-            response = await instance.getVehicleCodesByMake(countryMock, makeMock);
+            response = await instance.getVehicleCodesByMake(countryMock, makeMock, {});
         });
 
         it('Should build query params', () => {
