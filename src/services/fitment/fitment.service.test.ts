@@ -180,6 +180,37 @@ describe('src/services/fitment/fitment.service', () => {
         });
     });
 
+    describe('getVehicleCodesByMake()', () => {
+        let response: any;
+        const queryResponseMock = [{ code: 'TEST_CODE', model: 'MODEL_CODE' }];
+        const countryMock = 'test_country';
+        const makeMock = 'test_make';
+        const instance: any = new FitmentService();
+        const pg = {
+            query: sandbox.stub().resolves({
+                rows: queryResponseMock,
+            }),
+        };
+
+        beforeAll(async () => {
+
+            injectCache.clear();
+            injectStore.set('PG', {
+                create: () => Promise.resolve(pg),
+            });
+            response = await instance.getVehicleCodesByMake(countryMock, makeMock, {});
+        });
+
+        it('Should build query params', () => {
+            const [, values] = pg.query.getCall(0).args;
+            expect(values).toEqual([countryMock, makeMock]);
+        });
+
+        it('Should return vehicle codes', () => {
+            expect(response).toEqual(queryResponseMock);
+        });
+    });
+
     describe('static getInstance()', () => {
         it('Should return new instance', async () => {
             expect(

@@ -85,6 +85,7 @@ describe('src/services/import/map.service', () => {
                 format: 'format',
                 hubraum: 1,
                 hsntsn: '320 150',
+                model: 'TEST MODEL NAME',
             });
 
             expect(result.id).toEqual('test');
@@ -93,6 +94,7 @@ describe('src/services/import/map.service', () => {
             expect(result.segmentId).toEqual('segment');
             expect(result.formatId).toEqual('format');
             expect(result.hsntsn).toEqual([['320', '150']]);
+            expect(result.code).toEqual('test-model-name');
         });
 
         it('Should request dictionary value by locale', () => {

@@ -50,7 +50,7 @@ describe('src/services/import/import.service', () => {
         it('Should pass vehicle data', () => {
             const [, values] = dbMock.query.getCall(4).args;
             expect(values).toEqual([
-                'P00000100000016', '{"4001,150","4136,320","4136,340"}', '{de}', false, 'Alfa 145/146',
+                'P00000100000016', '{"4001,150","4136,320","4136,340"}', 'alfa-145_146', '{de}', false, 'Alfa 145/146',
                 'alfa_romeo', '930', 1997, 1,
                 2001, 1, 'key', 'key', 1370, '{"de_de":"1.4 TS(76 KW, 103 PS)"}',
                 76, 103, 'key', 185, 1655, '{"front":950,"rear":900}',

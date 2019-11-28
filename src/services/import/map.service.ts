@@ -65,6 +65,7 @@ export class MapService {
         return {
             id: raw.vehicleId,
             hsntsn: this.unmarshalHsnTsn(raw.hsntsn),
+            code: raw.model.toLowerCase().replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/ig, '_'),
             countries: [this.country],
             tpms: SapService.unmarshalBoolean(raw.pressureMonitoringSystem),
             model: raw.model,
