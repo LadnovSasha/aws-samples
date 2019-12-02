@@ -66,6 +66,8 @@ Resources:
       MasterUserPassword: ${opt:pg-password}
       DBName: fitment
       Engine: postgres
+      StorageEncrypted: true
+      StorageType: gp2
       DBSubnetGroupName: ${opt:dbSubnetGroup, 'gaas-prod'}
       VPCSecurityGroups:
         - ${opt:vpcSecurityGroup}

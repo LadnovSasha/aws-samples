@@ -77,6 +77,8 @@ Resources:
       MasterUserPassword: ${opt:pg-password, "developerSuperPWD"}
       DBName: fitment
       Engine: postgres
+      StorageEncrypted: true
+      StorageType: gp2
   FitmentLambdaNautilusUsagePlanKey:
     Type: "AWS::ApiGateway::UsagePlanKey"
     DependsOn: ApiGatewayUsagePlan
