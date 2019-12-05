@@ -65,10 +65,9 @@ export class MapService {
         return {
             id: raw.vehicleId,
             hsntsn: this.unmarshalHsnTsn(raw.hsntsn),
-            code: raw.model.toLowerCase().replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/ig, '_'),
+            code: MapService.generateCodeByModelName(raw.model),
             countries: [this.country],
             tpms: SapService.unmarshalBoolean(raw.pressureMonitoringSystem),
-            model: raw.model,
             manufacturer: await this.checkAndGetManufacturer(raw.manufacturer, raw.imageName),
             platform: raw.platform,
             startBuildYear: raw.startBuildYear,
@@ -171,5 +170,9 @@ export class MapService {
             loadIndex: loadIndex ? Number.parseInt(loadIndex, 10) : undefined,
             loadIndex2: loadIndex2 ? Number.parseInt(loadIndex2, 10) : undefined,
         };
+    }
+
+    static generateCodeByModelName(modelName: string): string {
+        return modelName.toLowerCase().replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/ig, '_');
     }
 }

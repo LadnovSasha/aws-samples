@@ -2,9 +2,9 @@
   "compilerOptions": {
     "module": "commonjs",
     "outDir": ".build",
-    "target": "es6",
+    "target": "es2018",
     "lib": [
-      "es6"
+      "es2018"
     ],
     "experimentalDecorators": true,
     "moduleResolution": "node",
@@ -28,6 +28,7 @@
   ],
   "exclude": [
     "node_modules",
-    "coverage"
+    "coverage",
+    "src/**/*.test.ts"
   ]
 }
