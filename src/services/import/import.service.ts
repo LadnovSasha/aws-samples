@@ -22,7 +22,6 @@ export class ImportService {
     protected squelOptions: squel.QueryBuilderOptions = {
         autoQuoteFieldNames: true,
         nameQuoteCharacter: '"',
-        replaceSingleQuotes: true,
     };
 
     async importChunk(range: IFileRange) {

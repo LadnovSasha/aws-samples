@@ -25,7 +25,7 @@ describe('src/services/import/import.service', () => {
     describe('importChunk()', () => {
         const instance: any = new ImportService();
         const dbMock = {
-            query: sinon.stub().resolves({ rows: [{ key: 'key' }] }),
+            query: sinon.stub().resolves({ rows: [{ key: 'key', vehicleId: ['test'] }] }),
         };
 
         beforeAll(async () => {
@@ -37,20 +37,40 @@ describe('src/services/import/import.service', () => {
             await instance.importChunk({ fileName: 'GDY_DE_DE.csv', start: 0, end: 100 });
         });
 
-        it('Should insert vehicle data first', () => {
-            const [query] = dbMock.query.getCall(4).args;
+        // it('Should insert models data first', () => {
+        //     const [query] = dbMock.query.getCall(4).args;
+        //     expect(query).toMatch(/INSERT INTO vehicles/);
+        // });
+
+        // it('Should update models on conflict', () => {
+        //     const [query] = dbMock.query.getCall(4).args;
+        //     expect(query).toMatch(/ ON CONFLICT \(id\) DO UPDATE SET/);
+        // });
+
+        // it('Should pass models data', () => {
+        //     const [, values] = dbMock.query.getCall(4).args;
+        //     expect(values).toEqual([
+        //         'P00000100000016', '{"4001,150","4136,320","4136,340"}', 'alfa-145_146', '{de}', false, 'Alfa 145/146',
+        //         'alfa_romeo', '930', 1997, 1,
+        //         2001, 1, 'key', 'key', 1370, '{"de_de":"1.4 TS(76 KW, 103 PS)"}',
+        //         76, 103, 'key', 185, 1655, '{"front":950,"rear":900}',
+        //     ]);
+        // });
+
+        it('Should insert vehicle data', () => {
+            const [query] = dbMock.query.getCall(6).args;
             expect(query).toMatch(/INSERT INTO vehicles/);
         });
 
         it('Should update vehicles on conflict', () => {
-            const [query] = dbMock.query.getCall(4).args;
+            const [query] = dbMock.query.getCall(6).args;
             expect(query).toMatch(/ ON CONFLICT \(id\) DO UPDATE SET/);
         });
 
         it('Should pass vehicle data', () => {
-            const [, values] = dbMock.query.getCall(4).args;
+            const [, values] = dbMock.query.getCall(6).args;
             expect(values).toEqual([
-                'P00000100000016', '{"4001,150","4136,320","4136,340"}', 'alfa-145_146', '{de}', false, 'Alfa 145/146',
+                'P00000100000016', '{"4001,150","4136,320","4136,340"}', 'alfa-145_146', '{de}', false,
                 'alfa_romeo', '930', 1997, 1,
                 2001, 1, 'key', 'key', 1370, '{"de_de":"1.4 TS(76 KW, 103 PS)"}',
                 76, 103, 'key', 185, 1655, '{"front":950,"rear":900}',
@@ -58,17 +78,17 @@ describe('src/services/import/import.service', () => {
         });
 
         it('Should insert fitments', () => {
-            const [query] = dbMock.query.getCall(5).args;
+            const [query] = dbMock.query.getCall(7).args;
             expect(query).toMatch(/INSERT INTO fitments/);
         });
 
         it('Should update fitments on conflict', () => {
-            const [query] = dbMock.query.getCall(5).args;
+            const [query] = dbMock.query.getCall(7).args;
             expect(query).toMatch(/ ON CONFLICT \(id\) DO UPDATE SET/);
         });
 
         it('Should pass fitment data', () => {
-            const [, values] = dbMock.query.getCall(5).args;
+            const [, values] = dbMock.query.getCall(7).args;
             expect(values).toEqual([
                 '00354000001600354', 'P00000100000016', '{"front":2.8,"rear":2.6}', '{"front":2.6,"rear":2.2}',
                 '{"mixedFitment":true,"front":{"widthMM":175,"rim":14,"loadIndex":82,"speedIndex":"H","aspectRatio":65},"rear":{"widthMM":175,"rim":14,"loadIndex":82,"aspectRatio":65,"speedIndex":"H"}}',
