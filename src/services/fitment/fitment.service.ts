@@ -65,10 +65,10 @@ export class FitmentService {
             : FitmentService.fallbackLocale;
 
         const sqlQuery = this.squel.select()
-            .field('code')
-            .field(`m.name->>'${locale}'`, 'model')
+            .field('distinct code')
+            .field(`m.value->>'${locale}'`, 'model')
             .from(this.vehiclesTable, 'v')
-            .left_join('manufacturers', 'm', 'manufacturer = m.key')
+            .left_join('modeltypes', 'm', 'code = m.key')
             .where('? = ANY (v.countries)', country)
             .where('v.manufacturer = ?', make);
 
