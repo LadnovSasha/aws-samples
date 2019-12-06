@@ -8,6 +8,7 @@ import { fitmentConfiguration, dictionaryConfiguration } from './import.configur
 import { IImportFitment, IDictionary } from 'fitment-interface';
 import { MapService } from './map.service';
 import { IFileRange, IDictionaryCsvRow } from './import.service.interface';
+import { FitmentService } from '../fitment/fitment.service';
 
 export class ImportService {
     static delimeter = ';';
@@ -16,16 +17,19 @@ export class ImportService {
 
     protected fitmentTable = 'fitments';
     protected vehicleTable = 'vehicles';
+    protected modelTypes = 'modeltypes';
     protected squel = squel.useFlavour('postgres');
     protected file: FileService = new FileService();
-    protected squelOptions: squel.QueryBuilderOptions = { autoQuoteFieldNames: true, nameQuoteCharacter: '"' };
+    protected squelOptions: squel.QueryBuilderOptions = {
+        autoQuoteFieldNames: true,
+        nameQuoteCharacter: '"',
+    };
 
     async importChunk(range: IFileRange) {
         const rawFitments = await this.parseFile<IImportFitment>(range, fitmentConfiguration);
         const locale: string = this.getLocaleFromFileName(range.fileName);
         const updatePromises = rawFitments.map(async (row) => {
-            await this.insertVehicle(row, locale);
-            await this.insertFitments(row);
+            await this.triggerImportsByLocale(range, row, locale);
         });
 
         await Promise.all(updatePromises);
@@ -133,7 +137,7 @@ export class ImportService {
                 ) as s1
             ),
             "engineDescription" = ${this.vehicleTable}."engineDescription" || excluded."engineDescription",
-            tpms = excluded.tpms, "engineSizePs" = excluded."engineSizePs", hsntsn = excluded.hsntsn
+            tpms = excluded.tpms, "engineSizePs" = excluded."engineSizePs", hsntsn = excluded.hsntsn, code = excluded.code
         `;
         const { text, values } = this.squel.insert(this.squelOptions)
             .into(this.vehicleTable)
@@ -147,6 +151,110 @@ export class ImportService {
             .toParam();
 
         await db!.query(text + onConflictClause, values);
+    }
+
+    @Injectable()
+    protected async importModels(
+        rawFitments: IImportFitment,
+        locale: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ) {
+
+        const code = MapService.generateCodeByModelName(rawFitments.model);
+        const { key, vehicleId } = await this.getKeyByVehicleId(code, rawFitments.vehicleId);
+
+        if (key) {
+            await this.updateVehicleModel(vehicleId, code, locale, rawFitments, key);
+        } else {
+            await this.upsertVehicleModel(rawFitments, locale, code);
+        }
+    }
+
+    @Injectable()
+    protected async upsertVehicleModel(
+        rawFitments: IImportFitment,
+        locale: string,
+        code: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ) {
+        const { text, values } = this.squel.insert(this.squelOptions)
+            .into(`${this.modelTypes} as m`)
+            .setFields({
+                vehicleId: `{"${rawFitments.vehicleId}"}`,
+                key: code,
+                value: JSON.stringify({ [locale] : rawFitments.model }),
+            })
+            .toParam();
+
+        const onConflictClause = ` ON CONFLICT (key) DO UPDATE SET
+            value = jsonb_set(m.value, '{"${locale}"}', '"${rawFitments.model}"'),
+            "vehicleId" = (
+                Select array_agg(DISTINCT v.unnest) FROM (
+                    SELECT unnest("vehicleId" || excluded."vehicleId") from ${this.modelTypes} where key = excluded.key
+                ) as v
+            )`;
+
+        await db!.query(text + onConflictClause, values);
+    }
+
+    @Injectable()
+    protected async updateVehicleModel(
+        vehicleId: string | undefined,
+        code: string,
+        locale: string,
+        rawFitments: IImportFitment,
+        key: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ) {
+        const updateQuery = this.squel.update({ replaceSingleQuotes: true })
+            .table(`${this.modelTypes} as m`)
+            .set(`value = jsonb_set(m.value, '{"${locale}"}', '"${rawFitments.model}"')`)
+            .where('key = ?', code);
+
+        if (!vehicleId) {
+            updateQuery.set(`"vehicleId" = (
+                Select array_agg(DISTINCT m.unnest) FROM (
+                    SELECT unnest("vehicleId" || '{"${rawFitments.vehicleId}"}') from modeltypes where key = ${code}
+                )
+            )`);
+        }
+
+        if (locale === FitmentService.fallbackLocale) {
+            updateQuery.set('key = ?', key);
+        }
+
+        const { text, values } = updateQuery.toParam();
+
+        await db!.query(text, values);
+    }
+
+    @Injectable()
+    protected async getKeyByVehicleId(
+        key: string,
+        id: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ): Promise<{ key: string, vehicleId: string | undefined }> {
+        const { rows } = await db!.query<{key: string, vehicleId: string[]}>(`SELECT key, "vehicleId" FROM ${this.modelTypes} WHERE "vehicleId" @> '{"${id}"}' OR key = '${key}';`);
+        return {
+            key: rows[0]?.key,
+            vehicleId: rows[0]?.vehicleId.includes(id) ? id : undefined,
+        };
+    }
+
+    protected async triggerImportsByLocale(
+        range: IFileRange,
+        row: IImportFitment,
+        locale: string,
+    ) {
+        switch (locale) {
+            case FitmentService.fallbackLocale:
+                await this.importModels(row, locale);
+                await this.insertVehicle(row, locale);
+                await this.insertFitments(row);
+                break;
+            default:
+                await this.importModels(row, locale);
+        }
     }
 
     protected getLocaleFromFileName(fileName: string) {

@@ -1,6 +1,6 @@
 {
   "name": "fitment-lambda",
-  "version": "1.0.33",
+  "version": "1.0.34",
   "description": "",
   "main": "./dist/src/index.js",
   "scripts": {
@@ -10,7 +10,7 @@
     "start": "serverless offline start --stage=local",
     "deploy": "serverless deploy -v --stage=development",
     "package": "serverless package -v",
-    "prepublishOnly": "tsc --outDir dist",
+    "prepublishOnly": "tsc --outDir dist --sourceMap false",
     "validate": "lambda-validate ./package.json",
     "bump": "npm version patch"
   },
@@ -21,7 +21,7 @@
   "dependencies": {
     "aws-xray-sdk": "^2.4.0",
     "csv-parse": "^4.6.3",
-    "fitment-interface": "2.0.8",
+    "fitment-interface": "2.0.9",
     "lambda-core": "2.0.6",
     "lodash.omit": "^4.5.0",
     "pg": "^7.12.1",
