@@ -8,6 +8,7 @@ import { fitmentConfiguration, dictionaryConfiguration } from './import.configur
 import { IImportFitment, IDictionary } from 'fitment-interface';
 import { MapService } from './map.service';
 import { IFileRange, IDictionaryCsvRow } from './import.service.interface';
+import { FitmentService } from '../fitment/fitment.service';
 
 export class ImportService {
     static delimeter = ';';
@@ -218,7 +219,7 @@ export class ImportService {
             )`);
         }
 
-        if (locale === 'de_de') {
+        if (locale === FitmentService.fallbackLocale) {
             updateQuery.set('key = ?', key);
         }
 
@@ -246,7 +247,7 @@ export class ImportService {
         locale: string,
     ) {
         switch (locale) {
-            case 'de_de':
+            case FitmentService.fallbackLocale:
                 await this.importModels(row, locale);
                 await this.insertVehicle(row, locale);
                 await this.insertFitments(row);
