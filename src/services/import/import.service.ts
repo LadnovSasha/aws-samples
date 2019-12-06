@@ -189,9 +189,9 @@ export class ImportService {
         const onConflictClause = ` ON CONFLICT (key) DO UPDATE SET
             value = jsonb_set(m.value, '{"${locale}"}', '"${rawFitments.model}"'),
             "vehicleId" = (
-                Select array_agg(DISTINCT m.unnest) FROM (
+                Select array_agg(DISTINCT v.unnest) FROM (
                     SELECT unnest("vehicleId" || excluded."vehicleId") from ${this.modelTypes} where key = excluded.key
-                ) as m
+                ) as v
             )`;
 
         await db!.query(text + onConflictClause, values);
