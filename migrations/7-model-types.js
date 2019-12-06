@@ -9,7 +9,7 @@ module.exports = {
             value jsonb,
             "vehicleId" text[]
         );`))
-        .then(() => migration.sequelize.query(`ALTER TABLE vehicles ADD COLUMN code varchar(50) NOT NULL REFERENCES modeltypes (key) ON UPDATE CASCADE`));
+        .then(() => migration.sequelize.query(`ALTER TABLE vehicles ADD COLUMN code varchar(50) REFERENCES modeltypes (key) ON UPDATE CASCADE`));
     },
     down(migration) {
         return migration.sequelize.query('DROP TABLE IF EXISTS modeltypes CASCADE;')
