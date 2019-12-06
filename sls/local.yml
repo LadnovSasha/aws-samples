@@ -1,6 +1,6 @@
 alertNotifications: ""
 vpc: ""
-DATABASE_URL: "postgres://postgres:postgres@localhost:5432/fitment"
+DATABASE_URL: "postgres://developer:developerSuperPWD@development-fitment-encrypted-local.cnlexypysxdw.eu-central-1.rds.amazonaws.com:5432/fitment"
 Resources:
   requestBodyValidator:
     Type: 'AWS::ApiGateway::RequestValidator'

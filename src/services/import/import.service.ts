@@ -213,9 +213,9 @@ export class ImportService {
 
         if (!vehicleId) {
             updateQuery.set(`"vehicleId" = (
-                Select array_agg(DISTINCT m.unnest) FROM (
+                Select array_agg(DISTINCT v.unnest) FROM (
                     SELECT unnest("vehicleId" || '{"${rawFitments.vehicleId}"}') from modeltypes where key = ${code}
-                )
+                ) as v
             )`);
         }
 
