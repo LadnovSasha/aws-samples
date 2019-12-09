@@ -196,7 +196,7 @@ export class ImportService {
                 ) as v
             )`;
 
-        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${rawFitments}`);
+        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${JSON.stringify(rawFitments)}`);
     }
 
     @Injectable()
@@ -227,7 +227,7 @@ export class ImportService {
 
         const { text, values } = updateQuery.toParam();
 
-        await this.executeDBQuery(text, values, `Update vehicle model ${code} found key ${key} with values ${rawFitments}`);
+        await this.executeDBQuery(text, values, `Update vehicle model ${code} found key ${key} with values ${JSON.stringify(rawFitments, null, 2)}`);
     }
 
     @Injectable()
@@ -297,7 +297,7 @@ export class ImportService {
         try {
             return await db!.query(query, values);
         } catch (err) {
-            log!.error(`Execution DB errror ${err.message}:  ${additionalData}`);
+            log!.error(`Execution DB errror: ${err.message} data ${additionalData || ''}, query - ${query}, values - ${values}`);
             throw err;
         }
     }
