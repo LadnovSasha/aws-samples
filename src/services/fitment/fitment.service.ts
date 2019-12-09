@@ -89,16 +89,15 @@ export class FitmentService {
     async getVehiclesByMake(
         country: string,
         makeId: string,
+        model: string,
         query: IVehicleByMakeQueryRequest,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ): Promise<IVehicleFitmentsResponse[]> {
         const locale = this.buildLocale(country, query.language);
         const sqlQuery = this.getBaseVehicleRequest(locale, country)
-            .where('v.manufacturer = ?', makeId);
+            .where('v.manufacturer = ?', makeId)
+            .where('v.code = ?', model);
 
-        if (query.model) {
-            sqlQuery.where('v.model = ?', query.model);
-        }
         if (query.energyType) {
             sqlQuery.where('v."fuelId" = ?', query.energyType);
         }
@@ -106,7 +105,7 @@ export class FitmentService {
             sqlQuery.where('v."startBuildYear" = ?', query.year);
         }
 
-        const includeFitments = query.model || query.year || query.energyType;
+        const includeFitments = model || query.year || query.energyType;
         const { text, values } = includeFitments ? this.getFitmentsRequest(sqlQuery).toParam() : sqlQuery.toParam();
         const { rows } = await db!.query<IVehicleFitmentsRaw | IVehicleRaw>(text, values);
 
@@ -137,7 +136,7 @@ export class FitmentService {
     protected getBaseVehicleRequest(locale: string, country: string) {
         return this.squel.select()
             .field('v.id', 'id')
-            .field('model')
+            .field(`COALESCE(mt.value->>'${locale}', mt.value->>'${FitmentService.fallbackLocale}')`, 'model')
             .field(`
             json_build_object('id', m.key, 'name', COALESCE(m.name->>'${locale}', m.name->>'${FitmentService.fallbackLocale}'), 'logo', m.logo, 'description', '')
             `, 'manufacturer')
@@ -166,7 +165,8 @@ export class FitmentService {
             .left_join('manufacturers', 'm', 'manufacturer = m.key')
             .left_join('segmenttypes', 'st', '"segmentId" = st.key')
             .left_join('formattypes', 'ft', '"formatId" = ft.key')
-            .left_join('fueltypes', 'fuelt', '"fuelId" = fuelt.key');
+            .left_join('fueltypes', 'fuelt', '"fuelId" = fuelt.key')
+            .left_join('modeltypes', 'mt', 'v.code = mt.key');
     }
 
     protected getFitmentsRequest(squel: squel.PostgresSelect) {
@@ -204,7 +204,8 @@ export class FitmentService {
             .group('m.key')
             .group('st.key')
             .group('ft.key')
-            .group('fuelt.key');
+            .group('fuelt.key')
+            .group('mt.key');
     }
 
     protected buildLocale(country: string, language?: string) {
