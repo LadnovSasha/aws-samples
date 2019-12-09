@@ -147,12 +147,12 @@ functions:
     private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
     - http:
-        path: ${self:provider.environment.API_VERSION}/{country}/car/make/{make}
+        path: ${self:provider.environment.API_VERSION}/{country}/car/{make}/{model}
         method: get
         cors: true
         documentation:
-          summary: Returns the result of a quick health status of the API.
-          description: Returns the result of a quick health status of the API.
+          summary: Returns a list of vehicles for given make.
+          description: Returns a list of vehicles for given make.
           tags:
           - Health
           methodResponses:

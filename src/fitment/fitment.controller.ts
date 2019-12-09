@@ -32,11 +32,11 @@ export class FitmentController extends Controller {
     async getCarByMake(
         @Inject('FitmentService') service?: FitmentService,
     ) {
-        const { country, make } = this.getPathParams<IVehicleByMakePathRequest>();
+        const { country, make, model } = this.getPathParams<IVehicleByMakePathRequest>();
         const query = this.getQueryParams<IVehicleByMakeQueryRequest>();
         return this.getResponse().general(
             ResponseCode.OK,
-            await service!.getVehiclesByMake(country, make, query),
+            await service!.getVehiclesByMake(country, make, model, query),
             responseHeaders,
         );
     }

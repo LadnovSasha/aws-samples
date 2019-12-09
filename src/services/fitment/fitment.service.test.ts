@@ -78,8 +78,7 @@ describe('src/services/fitment/fitment.service', () => {
         beforeAll(async () => {
             injectCache.clear();
             injectStore.set('PG', { create: () => Promise.resolve(pg) });
-            response = await instance.getVehiclesByMake('de', 'makeId', {
-                model: 'model',
+            response = await instance.getVehiclesByMake('de', 'makeId', 'model', {
                 energyType: 'energyType',
                 year: '2019',
             });
@@ -98,7 +97,7 @@ describe('src/services/fitment/fitment.service', () => {
         it('Should filter by mode, energyType and year', () => {
             const [query, values] = pg.query.getCall(0).args;
 
-            expect(query).toMatch(/v.model = \$3/);
+            expect(query).toMatch(/v.code = \$3/);
             expect(query).toMatch(/v."fuelId" = \$4/);
             expect(query).toMatch(/v."startBuildYear" = \$5/);
             expect(values).toEqual(['de', 'makeId', 'model', 'energyType', '2019']);
