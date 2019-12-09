@@ -2,7 +2,7 @@ import squel = require('squel');
 import { PoolClient } from 'pg';
 import {
     IParseServiceConfig, Injectable, Inject,
-    FileService, ParseService, LogService, Logger
+    FileService, ParseService, Logger,
 } from 'lambda-core';
 import { fitmentConfiguration, dictionaryConfiguration } from './import.configuration';
 import { IImportFitment, IDictionary } from 'fitment-interface';
@@ -24,7 +24,6 @@ export class ImportService {
         autoQuoteFieldNames: true,
         nameQuoteCharacter: '"',
     };
-    protected log = LogService.getInstance();
 
     async importChunk(range: IFileRange) {
         const rawFitments = await this.parseFile<IImportFitment>(range, fitmentConfiguration);
