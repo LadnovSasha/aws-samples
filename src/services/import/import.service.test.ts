@@ -50,6 +50,7 @@ describe('src/services/import/import.service', () => {
         it('Should pass modeltypes data', () => {
             const [, values] = dbMock.query.getCall(1).args;
             expect(values).toEqual([
+                'alfa-145_146',
                 'key',
                 'alfa-145_146',
             ]);
