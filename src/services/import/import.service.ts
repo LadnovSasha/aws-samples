@@ -2,7 +2,7 @@ import squel = require('squel');
 import { PoolClient } from 'pg';
 import {
     IParseServiceConfig, Injectable, Inject,
-    FileService, ParseService, LogService,
+    FileService, ParseService, LogService, Logger
 } from 'lambda-core';
 import { fitmentConfiguration, dictionaryConfiguration } from './import.configuration';
 import { IImportFitment, IDictionary } from 'fitment-interface';
@@ -292,12 +292,14 @@ export class ImportService {
         values: string[],
         additionalData?: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+        @Inject('LogService') log?: Logger,
     ) {
 
         try {
-            await db!.query(query, values);
+            return await db!.query(query, values);
         } catch (err) {
-            (await this.log).error(`Execution DB errror: ${additionalData}`);
+            log!.error(`Execution DB errror ${err.message}:  ${additionalData}`);
+            throw err;
         }
     }
 
