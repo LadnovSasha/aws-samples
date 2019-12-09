@@ -196,7 +196,7 @@ export class ImportService {
                 ) as v
             )`;
 
-        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${JSON.stringify(rawFitments)}`);
+        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${JSON.stringify(rawFitments, null, 2)}`);
     }
 
     @Injectable()
