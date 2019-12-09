@@ -2,7 +2,7 @@ import squel = require('squel');
 import { PoolClient } from 'pg';
 import {
     IParseServiceConfig, Injectable, Inject,
-    FileService, ParseService,
+    FileService, ParseService, LogService,
 } from 'lambda-core';
 import { fitmentConfiguration, dictionaryConfiguration } from './import.configuration';
 import { IImportFitment, IDictionary } from 'fitment-interface';
@@ -24,12 +24,15 @@ export class ImportService {
         autoQuoteFieldNames: true,
         nameQuoteCharacter: '"',
     };
+    protected log = LogService.getInstance();
 
     async importChunk(range: IFileRange) {
         const rawFitments = await this.parseFile<IImportFitment>(range, fitmentConfiguration);
         const locale: string = this.getLocaleFromFileName(range.fileName);
         const updatePromises = rawFitments.map(async (row) => {
-            await this.triggerImportsByLocale(range, row, locale);
+            await this.importModels(row, locale);
+            await this.insertVehicle(row, locale);
+            await this.insertFitments(row);
         });
 
         await Promise.all(updatePromises);
@@ -194,7 +197,7 @@ export class ImportService {
                 ) as v
             )`;
 
-        await db!.query(text + onConflictClause, values);
+        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${rawFitments}`);
     }
 
     @Injectable()
@@ -225,7 +228,7 @@ export class ImportService {
 
         const { text, values } = updateQuery.toParam();
 
-        await db!.query(text, values);
+        await this.executeDBQuery(text, values, `Update vehicle model ${code} found key ${key} with values ${rawFitments}`);
     }
 
     @Injectable()
@@ -239,22 +242,6 @@ export class ImportService {
             key: rows[0]?.key,
             vehicleId: rows[0]?.vehicleId.includes(id) ? id : undefined,
         };
-    }
-
-    protected async triggerImportsByLocale(
-        range: IFileRange,
-        row: IImportFitment,
-        locale: string,
-    ) {
-        switch (locale) {
-            case FitmentService.fallbackLocale:
-                await this.importModels(row, locale);
-                await this.insertVehicle(row, locale);
-                await this.insertFitments(row);
-                break;
-            default:
-                await this.importModels(row, locale);
-        }
     }
 
     protected getLocaleFromFileName(fileName: string) {
@@ -297,6 +284,21 @@ export class ImportService {
             resultRows.pop();
         }
         return this.joinCsvRows(resultRows);
+    }
+
+    @Injectable()
+    protected async executeDBQuery(
+        query: string,
+        values: string[],
+        additionalData?: string,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+    ) {
+
+        try {
+            await db!.query(query, values);
+        } catch (err) {
+            (await this.log).error(`Execution DB errror: ${additionalData}`);
+        }
     }
 
     protected splitCsvRows(csv: string): string[] {
