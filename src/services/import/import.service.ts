@@ -196,7 +196,7 @@ export class ImportService {
                 ) as v
             )`;
 
-        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${JSON.stringify(rawFitments, null, 2)}`);
+        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${JSON.stringify(rawFitments)}`);
     }
 
     @Injectable()
@@ -216,9 +216,9 @@ export class ImportService {
         if (!vehicleId) {
             updateQuery.set(`"vehicleId" = (
                 Select array_agg(DISTINCT v.unnest) FROM (
-                    SELECT unnest("vehicleId" || '{"${rawFitments.vehicleId}"}') from modeltypes where key = ${code}
+                    SELECT unnest("vehicleId" || '{"${rawFitments.vehicleId}"}') from modeltypes where key = ?
                 ) as v
-            )`);
+            )`, code);
         }
 
         if (locale === FitmentService.fallbackLocale) {
@@ -227,7 +227,7 @@ export class ImportService {
 
         const { text, values } = updateQuery.toParam();
 
-        await this.executeDBQuery(text, values, `Update vehicle model ${code} found key ${key} with values ${JSON.stringify(rawFitments, null, 2)}`);
+        await this.executeDBQuery(text, values, `Update vehicle model ${code} found key ${key} with values ${JSON.stringify(rawFitments)}`);
     }
 
     @Injectable()
@@ -297,7 +297,7 @@ export class ImportService {
         try {
             return await db!.query(query, values);
         } catch (err) {
-            log!.error(`Execution DB errror: ${err.message} data ${additionalData || ''}, query - ${query}, values - ${values}`);
+            log!.error(`Execution DB errror: ${err.message}. Query - ${query}, Values - ${values}, Additional data - ${additionalData || ''}`);
             throw err;
         }
     }
