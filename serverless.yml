@@ -93,7 +93,7 @@ functions:
   importHandler:
     handler: src/import/handler.handleImport
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
-    concurrency: 20
+    reservedConcurrency: 20
     timeout: 60
     events:
     - sqs:
