@@ -147,7 +147,7 @@ functions:
     private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
     - http:
-        path: ${self:provider.environment.API_VERSION}/{country}/car/{make}/{model}
+        path: ${self:provider.environment.API_VERSION}/{country}/car/make/{make}/{model}
         method: get
         cors: true
         documentation:
