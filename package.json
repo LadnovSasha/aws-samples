@@ -1,6 +1,6 @@
 {
   "name": "fitment-lambda",
-  "version": "1.0.45",
+  "version": "1.0.46",
   "description": "",
   "main": "./dist/src/index.js",
   "scripts": {
@@ -45,7 +45,7 @@
     "jest": "^24.8.0",
     "jest-bamboo-reporter": "^1.2.0",
     "request-promise": "^4.2.4",
-    "serverless": "^1.50.0",
+    "serverless": "^1.59.3",
     "serverless-api-compression": "^1.0.1",
     "serverless-aws-documentation": "^1.1.0",
     "serverless-domain-manager": "^2.6.13",
