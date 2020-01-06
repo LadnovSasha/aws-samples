@@ -1,7 +1,7 @@
 service: fitment-lambda
 provider:
   name: aws
-  runtime: nodejs10.x
+  runtime: nodejs12.x
   region: eu-central-1
   stage: stage
   timeout: 20
@@ -17,6 +17,7 @@ provider:
     BUCKET: ${opt:stage, self:provider.stage}-fitment-import-${opt:salt, "local"}
     BUCKET_PUBLIC: ${opt:stage, self:provider.stage}-fitment-public-${opt:salt, "local"}
     DATABASE_URL: ${file(./sls/${opt:stage, self:provider.stage}.yml):DATABASE_URL}
+    IMPORT_CHUNK_SIZE: 1000000
   tracing: true # enable tracing
   usagePlan: {}
   iamRoleStatements:
@@ -90,18 +91,6 @@ functions:
             description: Returned when the operation is completed successfully.
             responseModels:
               "application/json": HealthStatusResponse
-  importHandler:
-    handler: src/import/handler.handleImport
-    vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
-    reservedConcurrency: 20
-    timeout: 60
-    events:
-    - sqs:
-        batchSize: 1
-        arn:
-          Fn::GetAtt:
-            - FitmentImportQueue
-            - Arn
   importDictionaries:
     handler: src/import/handler.importDictionaries
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
@@ -114,6 +103,7 @@ functions:
   importFitments:
     handler: src/import/handler.importFitments
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
+    timeout: 900
     events:
     - s3:
         bucket: Import

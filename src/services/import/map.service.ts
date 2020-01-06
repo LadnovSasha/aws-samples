@@ -1,10 +1,11 @@
 import {
     IImportFitment, IVehicle, IFitment,
 } from 'fitment-interface';
-import { Injectable, Inject, SapService } from 'lambda-core';
+import { Injectable, Inject, SapService, Logger } from 'lambda-core';
 import { PoolClient } from 'pg';
 import { transliterate } from 'transliteration';
 import { DictionaryTables } from './map.service.interface';
+import { fitmentConfiguration } from './import.configuration';
 
 const manufacturersCache: Map<string, Promise<any>> = new Map();
 
@@ -97,13 +98,15 @@ export class MapService {
         type: DictionaryTables,
         name: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
+        @Inject('LogService') log?: Logger,
     ) {
         const { rows } = await db!.query(`
         SELECT key from ${type} WHERE lower(value->>'${this.locale}') = lower($1)
         `, [name]);
 
         if (rows.length === 0) {
-            throw new Error('Unsupported locale or dictionary value');
+            log!.warn(`Unsupported locale: ${this.locale} or dictionary value: ${name} for ${type} table`);
+            return null;
         }
 
         return rows[0].key;
@@ -174,5 +177,12 @@ export class MapService {
 
     static generateCodeByModelName(modelName: string): string {
         return modelName.toLowerCase().replace(/\s/g, '-').replace(/[^A-Za-z0-9-]/ig, '_');
+    }
+
+    static mapTableData(data: string[]): IImportFitment {
+        return fitmentConfiguration.reduce((result: IImportFitment, { target, format }, key: number) => {
+            result[target] = format(data[key]);
+            return result;
+        }, {} as IImportFitment);
     }
 }

@@ -2,12 +2,8 @@ import { injectCache, injectStore } from 'lambda-core';
 import * as sinon from 'sinon';
 
 const importServiceMock = {
-    importChunk: sinon.stub().resolves(),
-};
-
-const sqsMock = {
-    delete: sinon.stub().resolves(),
-    send: sinon.stub().resolves(),
+    importRows: sinon.stub().resolves(),
+    parseStreamedFile: sinon.stub().resolves(),
 };
 
 describe('src/import/import.controller', () => {
@@ -18,16 +14,14 @@ describe('src/import/import.controller', () => {
         injectStore.set('ImportService', {
             create: () => Promise.resolve(importServiceMock),
         });
-        injectStore.set('SqsService', {
-            create: () => Promise.resolve(sqsMock),
-        });
     });
 
     describe('importFitments()', () => {
         let response: any;
+        const fileName = 'import/test.txt';
         const event = {
             s3: {
-                object: { key: 'import/test.txt', size: 1048576 * 20 },
+                object: { key: fileName, size: 1048576 * 20 },
             },
         };
 
@@ -39,35 +33,8 @@ describe('src/import/import.controller', () => {
             expect(response.success).toEqual(true);
         });
 
-        it('Should send chunks to sqs queue', () => {
-            const [firstRange] = sqsMock.send.getCall(0).args;
-            const[secondRange] = sqsMock.send.getCall(1).args;
-
-            expect(firstRange).toEqual({
-                data: { start: 0, end: 102399, fileName: 'import/test.txt' },
-            });
-            expect(secondRange).toEqual({
-                data: { start: 102400, end: 204799, fileName: 'import/test.txt' },
-            });
-        });
-    });
-
-    describe('handleImport()', () => {
-        beforeAll(async () => {
-            await instance.handleImport({
-                Records: [
-                    { body: '{"start":0,"end":100,"fileName":"import/test.txt"}' },
-                ],
-            }, null, null);
-        });
-
-        it('Should process chunk', () => {
-            const [query] = importServiceMock.importChunk.getCall(0).args;
-            expect(query).toEqual({
-                fileName: 'import/test.txt',
-                start: 0,
-                end: 100,
-            });
+        it('Should pass to parseStreamedFile fileName as first argument', () => {
+            expect(importServiceMock.parseStreamedFile.getCall(0).args[0]).toEqual(fileName);
         });
     });
 });

@@ -1,39 +1,21 @@
-const jestConfig = {
-  globals: {
-    'ts-jest': {
-      tsConfig: 'tsconfig.json'
-    }
-  },
-  verbose: true,
-  notify: true,
-  testRegex: '\\.test\\.ts$',
-  testEnvironment: 'node',
-  testResultsProcessor: 'jest-bamboo-reporter',
-  transformIgnorePatterns: [
-    'node_modules'
-  ],
-  transform: {
-    '^.+\\.tsx?$': 'ts-jest'
-  },
-  moduleFileExtensions: [
-    'js',
-    'ts'
-  ],
-  moduleDirectories: [
-    './node_modules',
-    './src'
-  ],
-  collectCoverage: true,
-  collectCoverageFrom: [
-    'src/**/*.ts',
-    'src/**/*.js'
-  ],
+module.exports = {
   coverageThreshold: {
     global: {
       lines: 1
     }
   },
+  collectCoverage: true,
+  verbose: true,
+  notify: true,
   coverageDirectory: 'reports/coverage',
-  setupFiles: []
+  rootDir: '.',
+  transform: {
+    '\\.ts$': 'ts-jest',
+  },
+  testMatch: ['<rootDir>/src/**/*.test.ts'],
+  collectCoverageFrom: [
+    '<rootDir>/src/**/*.ts',
+  ],
+  moduleFileExtensions: ['ts', 'js'],
+  testEnvironment: 'node',
 };
-module.exports = jestConfig;

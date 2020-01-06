@@ -4,11 +4,10 @@ import {
     IParseServiceConfig, Injectable, Inject,
     FileService, ParseService, Logger,
 } from 'lambda-core';
-import { fitmentConfiguration, dictionaryConfiguration } from './import.configuration';
-import { IImportFitment, IDictionary } from 'fitment-interface';
+import { dictionaryConfiguration } from './import.configuration';
+import { IDictionary } from 'fitment-interface';
 import { MapService } from './map.service';
-import { IFileRange, IDictionaryCsvRow } from './import.service.interface';
-import { FitmentService } from '../fitment/fitment.service';
+import { IFileRange, IDictionaryCsvRow, IFitmentChunk } from './import.service.interface';
 
 export class ImportService {
     static delimeter = ';';
@@ -23,19 +22,9 @@ export class ImportService {
     protected squelOptions: squel.QueryBuilderOptions = {
         autoQuoteFieldNames: true,
         nameQuoteCharacter: '"',
+        replaceSingleQuotes: true,
+        singleQuoteReplacement: "''",
     };
-
-    async importChunk(range: IFileRange) {
-        const rawFitments = await this.parseFile<IImportFitment>(range, fitmentConfiguration);
-        const locale: string = this.getLocaleFromFileName(range.fileName);
-        const updatePromises = rawFitments.map(async (row) => {
-            await this.importModels(row, locale);
-            await this.insertVehicle(row, locale);
-            await this.insertFitments(row);
-        });
-
-        await Promise.all(updatePromises);
-    }
 
     async importDictionaries(fuelFile: string, vehicleFormatFile: string, segmentFile: string) {
         if (await this.existsFiles([fuelFile, segmentFile, vehicleFormatFile])) {
@@ -45,12 +34,34 @@ export class ImportService {
         }
     }
 
+    async importRows({ data, fileName }: { fileName: string, data: string[] }) {
+        const locale = this.getLocaleFromFileName(fileName);
+        const chunks = this.mapAndUniqueByVehicleId(data, locale);
+        await this.importModels(chunks, locale);
+        await this.insertVehicles(chunks);
+        await this.insertFitments(chunks);
+    }
+
+    protected mapAndUniqueByVehicleId(data: string[], locale: string) {
+        const { chunks } = data.reduce((res, val) => {
+            const splitted = val.replace(/\r/ig, '').split(';');
+            const data = MapService.mapTableData(splitted);
+            if (!res.ids[data.vehicleId]) {
+                res.chunks.push({ data, locale });
+                res.ids[data.vehicleId] = 1;
+            }
+            return res;
+        }, { chunks: [] as IFitmentChunk[], ids: {} });
+        return chunks;
+    }
+
     @Injectable()
     protected async importDictionary(
         filename: string,
         table: string,
         config: IParseServiceConfig[],
         @Inject('ParseService', { delimiter: ';' }) parser?: ParseService,
+        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ) {
         const items: IDictionaryCsvRow[] = await parser!.parse<IDictionaryCsvRow>(
             await this.file.getFile(filename),
@@ -66,7 +77,7 @@ export class ImportService {
 
             return {
                 key,
-                value: { ...item },
+                value: JSON.stringify({ ...item }),
             };
         });
 
@@ -84,12 +95,10 @@ export class ImportService {
         `;
         const { text, values } = this.squel.insert(this.squelOptions)
             .into(table)
-            .setFieldsRows(
-                rows.map(x => ({ key: x.key, value: JSON.stringify(x.value) })),
-            )
+            .setFieldsRows(rows)
             .toParam();
 
-        await db!.query(text + onConflictClause, values);
+        await this.executeDBQuery(text + onConflictClause, values, `Insert dictionaries ${JSON.stringify(rows)}`);
     }
 
     protected async existsFiles(
@@ -102,10 +111,18 @@ export class ImportService {
 
     @Injectable()
     protected async insertFitments(
-        rawFitments: IImportFitment,
+        rows: IFitmentChunk[],
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ) {
-        const fitment = MapService.unmarshalFitment(rawFitments);
+        const fitments = rows.map(({ data }) => {
+            const fitment = MapService.unmarshalFitment(data);
+            return {
+                ...fitment,
+                highwayPressure: JSON.stringify(fitment.highwayPressure),
+                normalPressure: JSON.stringify(fitment.normalPressure),
+                dimensions: JSON.stringify(fitment.dimensions),
+            };
+        });
         const onConflictClause = ` ON CONFLICT (id) DO UPDATE SET
             "highwayPressure" = ${this.fitmentTable}."highwayPressure" || excluded."highwayPressure",
             "normalPressure" = ${this.fitmentTable}."normalPressure" || excluded."normalPressure",
@@ -113,25 +130,29 @@ export class ImportService {
         `;
         const { text, values } = this.squel.insert(this.squelOptions)
             .into(this.fitmentTable)
-            .setFields({
-                ...fitment,
-                highwayPressure: JSON.stringify(fitment.highwayPressure),
-                normalPressure: JSON.stringify(fitment.normalPressure),
-                dimensions: JSON.stringify(fitment.dimensions),
-            })
+            .setFieldsRows(fitments)
             .toParam();
 
-        await db!.query(text + onConflictClause, values);
+        await this.executeDBQuery(text + onConflictClause, values, `Insert fitments ${JSON.stringify(fitments)}`);
     }
 
     @Injectable()
-    protected async insertVehicle(
-        rawFitments: IImportFitment,
-        locale: string,
+    protected async insertVehicles(
+        rows: IFitmentChunk[],
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ) {
-        const mapService = new MapService(locale);
-        const vehicle = await mapService.unmarshalVehicle(rawFitments);
+        const vehicles = [];
+        for (const { data, locale } of rows) {
+            const mapService = new MapService(locale);
+            const vehicle = await mapService.unmarshalVehicle(data);
+            vehicles.push({
+                ...vehicle,
+                hsntsn: this.marshalMultidimArray(vehicle.hsntsn),
+                countries: `{${mapService.country}}`,
+                engineDescription: JSON.stringify(vehicle.engineDescription),
+                axleLoad: JSON.stringify(vehicle.axleLoad),
+            });
+        }
         const onConflictClause = ` ON CONFLICT (id) DO UPDATE SET
             countries = (
                 Select array_agg(DISTINCT s1.unnest) FROM (
@@ -143,104 +164,48 @@ export class ImportService {
         `;
         const { text, values } = this.squel.insert(this.squelOptions)
             .into(this.vehicleTable)
-            .setFields({
-                ...vehicle,
-                hsntsn: this.marshalMultidimArray(vehicle.hsntsn),
-                countries: `{${mapService.country}}`,
-                engineDescription: JSON.stringify(vehicle.engineDescription),
-                axleLoad: JSON.stringify(vehicle.axleLoad),
-            })
+            .setFieldsRows(vehicles)
             .toParam();
 
-        await db!.query(text + onConflictClause, values);
+        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicles ${JSON.stringify(vehicles)}`);
     }
 
     @Injectable()
     protected async importModels(
-        rawFitments: IImportFitment,
+        rows: IFitmentChunk[],
         locale: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ) {
-
-        const code = MapService.generateCodeByModelName(rawFitments.model);
-        const { key, vehicleId } = await this.getKeyByVehicleId(code, rawFitments.vehicleId);
-
-        if (key) {
-            await this.updateVehicleModel(vehicleId, code, locale, rawFitments, key);
-        } else {
-            await this.upsertVehicleModel(rawFitments, locale, code);
-        }
+        const { chunks } = rows.reduce((res, { data, locale }) => {
+            const key = MapService.generateCodeByModelName(data.model);
+            if (!res.codes[key]) {
+                res.chunks.push({
+                    key,
+                    value: JSON.stringify({ [locale] : data.model.replace("'", "''") }),
+                });
+                res.codes[key] = true;
+            }
+            return res;
+        }, { chunks: [] as { key: string, value: string }[], codes: {} });
+        await this.upsertVehicleModel(chunks, locale);
     }
 
     @Injectable()
     protected async upsertVehicleModel(
-        rawFitments: IImportFitment,
+        chunks: { key: string, value: string }[],
         locale: string,
-        code: string,
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ) {
         const { text, values } = this.squel.insert(this.squelOptions)
             .into(`${this.modelTypes} as m`)
-            .setFields({
-                vehicleId: `{"${rawFitments.vehicleId}"}`,
-                key: code,
-                value: JSON.stringify({ [locale] : rawFitments.model }),
-            })
+            .setFieldsRows(chunks)
             .toParam();
 
         const onConflictClause = ` ON CONFLICT (key) DO UPDATE SET
-            value = jsonb_set(m.value, '{"${locale}"}', '"${rawFitments.model}"'),
-            "vehicleId" = (
-                Select array_agg(DISTINCT v.unnest) FROM (
-                    SELECT unnest("vehicleId" || excluded."vehicleId") from ${this.modelTypes} where key = excluded.key
-                ) as v
-            )`;
+            value = jsonb_set(m.value, '{"${locale}"}', excluded.value->'${locale}')
+        `;
 
-        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${JSON.stringify(rawFitments)}`);
-    }
-
-    @Injectable()
-    protected async updateVehicleModel(
-        vehicleId: string | undefined,
-        code: string,
-        locale: string,
-        rawFitments: IImportFitment,
-        key: string,
-        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
-    ) {
-        const updateQuery = this.squel.update({ replaceSingleQuotes: true })
-            .table(`${this.modelTypes} as m`)
-            .set(`value = jsonb_set(m.value, '{"${locale}"}', '"${rawFitments.model}"')`)
-            .where('key = ?', code);
-
-        if (!vehicleId) {
-            updateQuery.set(`"vehicleId" = (
-                Select array_agg(DISTINCT v.unnest) FROM (
-                    SELECT unnest("vehicleId" || '{"${rawFitments.vehicleId}"}') from modeltypes where key = ?
-                ) as v
-            )`, code);
-        }
-
-        if (locale === FitmentService.fallbackLocale) {
-            updateQuery.set('key = ?', key);
-        }
-
-        const { text, values } = updateQuery.toParam();
-
-        await this.executeDBQuery(text, values, `Update vehicle model ${code} found key ${key} with values ${JSON.stringify(rawFitments)}`);
-    }
-
-    @Injectable()
-    protected async getKeyByVehicleId(
-        key: string,
-        id: string,
-        @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
-    ): Promise<{ key: string, vehicleId: string | undefined }> {
-        const { rows } = await db!.query<{key: string, vehicleId: string[]}>(`SELECT key, "vehicleId" FROM ${this.modelTypes} WHERE "vehicleId" @> '{"${id}"}' OR key = '${key}';`);
-        return {
-            key: rows[0]?.key,
-            vehicleId: rows[0]?.vehicleId.includes(id) ? id : undefined,
-        };
+        await this.executeDBQuery(text + onConflictClause, values, `Insert vehicle model ${JSON.stringify(chunks)}`);
     }
 
     protected getLocaleFromFileName(fileName: string) {
@@ -286,10 +251,19 @@ export class ImportService {
     }
 
     @Injectable()
+    public async parseStreamedFile<T>(
+        fileName: string,
+        @Inject('ParseService', { delimiter: ImportService.delimeter }, { skipHeader: true }) parser?: ParseService,
+    ): Promise<void> {
+        const stream = this.file.getReadable(fileName);
+        await parser!.parseChunkData(stream, fileName, async (result: { fileName: string, data: string[] }) => await this.importRows(result));
+    }
+
+    @Injectable()
     protected async executeDBQuery(
         query: string,
         values: string[],
-        additionalData?: string,
+        additionalData = '',
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
         @Inject('LogService') log?: Logger,
     ) {
@@ -297,7 +271,7 @@ export class ImportService {
         try {
             return await db!.query(query, values);
         } catch (err) {
-            log!.error(`Execution DB errror: ${err.message}. Query - ${query}, Values - ${values}, Additional data - ${additionalData || ''}`);
+            log!.error(`Execution DB query errror: ${err.message}. Query - ${query}, Values - ${values}, Additional data - ${additionalData || 'missed'}`);
             throw err;
         }
     }
