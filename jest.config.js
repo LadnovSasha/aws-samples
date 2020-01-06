@@ -12,6 +12,7 @@ module.exports = {
   transform: {
     '\\.ts$': 'ts-jest',
   },
+  testResultsProcessor: 'jest-bamboo-reporter',
   testMatch: ['<rootDir>/src/**/*.test.ts'],
   collectCoverageFrom: [
     '<rootDir>/src/**/*.ts',
