@@ -127,7 +127,7 @@ export class MapService {
                 rear: raw.normalPressureRear,
             },
             dimensions: {
-                mixedFitment: MapService.fitmentsEqual(raw),
+                mixedFitment: !MapService.fitmentsEqual(raw),
                 front: {
                     ...MapService.getWidthInDimensions(raw.frontWidth),
                     rim: raw.frontRim,
