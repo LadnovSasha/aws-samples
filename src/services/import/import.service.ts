@@ -124,9 +124,9 @@ export class ImportService {
             };
         });
         const onConflictClause = ` ON CONFLICT (id) DO UPDATE SET
-            "highwayPressure" = ${this.fitmentTable}."highwayPressure" || excluded."highwayPressure",
-            "normalPressure" = ${this.fitmentTable}."normalPressure" || excluded."normalPressure",
-            "dimensions" = ${this.fitmentTable}."dimensions" || excluded."dimensions"
+            "highwayPressure" = excluded."highwayPressure",
+            "normalPressure" = excluded."normalPressure",
+            "dimensions" = excluded."dimensions"
         `;
         const { text, values } = this.squel.insert(this.squelOptions)
             .into(this.fitmentTable)
