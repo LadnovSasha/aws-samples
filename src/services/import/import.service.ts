@@ -36,23 +36,28 @@ export class ImportService {
 
     async importRows({ data, fileName }: { fileName: string, data: string[] }) {
         const locale = this.getLocaleFromFileName(fileName);
-        const chunks = this.mapAndUniqueByVehicleId(data, locale);
-        await this.importModels(chunks, locale);
-        await this.insertVehicles(chunks);
-        await this.insertFitments(chunks);
+        const { unique, duplicated } = this.mapAndUniqueByVehicleId(data, locale);
+        await this.importModels(unique, locale);
+        await this.insertVehicles(unique);
+        await this.insertFitments(unique.concat(duplicated));
     }
 
     protected mapAndUniqueByVehicleId(data: string[], locale: string) {
-        const { chunks } = data.reduce((res, val) => {
+        const { unique, duplicated } = data.reduce((res, val) => {
             const splitted = val.replace(/\r/ig, '').split(';');
             const data = MapService.mapTableData(splitted);
             if (!res.ids[data.vehicleId]) {
-                res.chunks.push({ data, locale });
-                res.ids[data.vehicleId] = 1;
+                res.unique.push({ data, locale });
+                res.ids[data.vehicleId] = true;
+                res.ids[data.fitment] = true;
+            }
+            if (!res.ids[data.fitment]) {
+                res.duplicated.push({ data, locale });
+                res.ids[data.fitment] = true;
             }
             return res;
-        }, { chunks: [] as IFitmentChunk[], ids: {} });
-        return chunks;
+        }, { unique: [] as IFitmentChunk[], duplicated: [] as IFitmentChunk[], ids: {} });
+        return { unique, duplicated };
     }
 
     @Injectable()
