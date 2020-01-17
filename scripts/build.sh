@@ -2,6 +2,10 @@
 
 set -e
 
+id
+apt-get update
+apt-get install -y curl > /dev/null
+
 source "${bamboo_build_working_directory}/scripts/common.sh"
 
 npm_pull_url="https://nexus.goodyear.eu/repository/gy-npm/"

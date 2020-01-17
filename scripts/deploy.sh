@@ -5,7 +5,7 @@ set -e
 
 id
 apt-get update
-apt-get install -y jq python-pip > /dev/null
+apt-get install -y jq python-pip curl > /dev/null
 pip install awscli
 
 
