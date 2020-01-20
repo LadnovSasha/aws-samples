@@ -105,7 +105,7 @@ export class MapService {
         `, [name]);
 
         if (rows.length === 0) {
-            log!.warn(`Unsupported locale: ${this.locale} or dictionary value: ${name} for ${type} table`);
+            if (name) log!.warn(`Unsupported locale: ${this.locale} or dictionary value: ${name} for ${type} table`);
             return null;
         }
 
