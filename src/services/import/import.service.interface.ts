@@ -15,3 +15,11 @@ export interface IFitmentChunk {
     locale: string;
     data: IImportFitment;
 }
+
+export interface IFitmentRow {
+    highwayPressure: string;
+    normalPressure: string;
+    dimensions: string;
+    vehicleId: string;
+    id: string;
+}

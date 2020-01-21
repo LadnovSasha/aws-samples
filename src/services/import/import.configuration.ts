@@ -43,7 +43,7 @@ export const fitmentConfiguration = [{
 }, {
     source: 'EndOfBuildMonth',
     target: 'endBuildMonth',
-    format: ParseService.numberFormatNull,
+    format: ParseService.numberFormat,
 }, {
     source: 'Fuel',
     target: 'fuel',
