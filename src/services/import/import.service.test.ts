@@ -32,6 +32,16 @@ describe('src/services/import/import.service', () => {
             'Auto segmentu C;Alfa 145/146;930;1997;1;2001;1;Benzyna;1370;1.4 TS(76 KW, 103 PS);' +
             '76;Hatchback;2.6;2.8;2.2;2.6;;0;175;65;14;82;H;;175;65;14;82;H;;alfa145y;Hatchback;185;1655;950;900',
         ];
+        const emptyMonthsMockData = [
+            'P00000100000016;00354000001600354;4001 150,4136 320,4136 340;Alfa Romeo;' +
+            'Auto segmentu C;Alfa 145/146;930;1997;-;2001;-;Benzyna;1370;1.4 TS(76 KW, 103 PS);' +
+            '76;Hatchback;2.6;2.8;2.2;2.6;;0;175;65;14;82;H;;175;65;14;82;H;;alfa145y;Hatchback;185;1655;950;900',
+        ];
+        const emptySpeedAndLoadMockData = [
+            'P00000100000016;00354000001600354;4001 150,4136 320,4136 340;Alfa Romeo;' +
+            'Auto segmentu C;Alfa 145/146;930;1997;1;2001;12;Benzyna;1370;1.4 TS(76 KW, 103 PS);' +
+            '76;Hatchback;2.6;2.8;2.2;2.6;;0;175;65;14;0;0;;175;65;14;0;0;;alfa145y;Hatchback;185;1655;950;900',
+        ];
         const mockFileName = 'GDY_DE_DE.csv';
 
         beforeAll(async () => {
@@ -89,6 +99,25 @@ describe('src/services/import/import.service', () => {
                 '00354000001600354', 'P00000100000016', '{"front":2.8,"rear":2.6}', '{"front":2.6,"rear":2.2}',
                 '{"mixedFitment":false,"front":{"widthMM":175,"rim":14,"loadIndex":82,"speedIndex":"H","aspectRatio":65},"rear":{"widthMM":175,"rim":14,"loadIndex":82,"aspectRatio":65,"speedIndex":"H"}}',
             ]);
+        });
+
+        it('should set null values for loadIndex and speedIndex for importFitments', async () => {
+            dbMock.query.resetHistory();
+            await instance.importRows({ fileName: mockFileName, data: emptySpeedAndLoadMockData });            
+            const [, values] = dbMock.query.getCall(5).args;
+            const parsedValues = JSON.parse(values[4]);
+            expect(parsedValues.front.loadIndex).toEqual(0);
+            expect(parsedValues.front.speedIndex).toEqual('0');
+            expect(parsedValues.rear.loadIndex).toEqual(0);
+            expect(parsedValues.rear.speedIndex).toEqual('0');
+        });
+
+        it('should set correct fromMonth and toMonth for importVehicles', async () => {
+            dbMock.query.resetHistory();
+            await instance.importRows({ fileName: mockFileName, data: emptyMonthsMockData });            
+            const [, values] = dbMock.query.getCall(4).args;
+            expect(values[8]).toEqual(1);
+            expect(values[10]).toEqual(12);
         });
     });
 
