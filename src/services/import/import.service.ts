@@ -5,9 +5,9 @@ import {
     FileService, ParseService, Logger,
 } from 'lambda-core';
 import { dictionaryConfiguration } from './import.configuration';
-import { IDictionary } from 'fitment-interface';
+import { IDictionary, IFitment } from 'fitment-interface';
 import { MapService } from './map.service';
-import { IFileRange, IDictionaryCsvRow, IFitmentChunk } from './import.service.interface';
+import { IFileRange, IDictionaryCsvRow, IFitmentChunk, IFitmentRow } from './import.service.interface';
 
 export class ImportService {
     static delimeter = ';';
@@ -119,15 +119,15 @@ export class ImportService {
         rows: IFitmentChunk[],
         @Inject('PG', { connectionString: process.env.DATABASE_URL }) db?: PoolClient,
     ) {
-        const fitments = rows.map(({ data }) => {
+        const fitments = rows.reduce((res, { data }) => {
             const fitment = MapService.unmarshalFitment(data);
-            return {
+            return res.concat(this.areSpeedOrLoadNull(fitment) ? [] : {
                 ...fitment,
                 highwayPressure: JSON.stringify(fitment.highwayPressure),
                 normalPressure: JSON.stringify(fitment.normalPressure),
                 dimensions: JSON.stringify(fitment.dimensions),
-            };
-        });
+            });
+        }, [] as IFitmentRow[]);
         const onConflictClause = ` ON CONFLICT (id) DO UPDATE SET
             "highwayPressure" = excluded."highwayPressure",
             "normalPressure" = excluded."normalPressure",
@@ -287,6 +287,13 @@ export class ImportService {
 
     protected joinCsvRows(csvRows: string[]): string {
         return csvRows.join('\n');
+    }
+
+    protected areSpeedOrLoadNull(fitment: IFitment) {
+        return (!fitment.dimensions.front.loadIndex && fitment.dimensions.front.loadIndex !== 0) ||
+        (!fitment.dimensions.front.speedIndex && fitment.dimensions.front.speedIndex !== '0') ||
+        (!fitment.dimensions.rear.loadIndex && fitment.dimensions.rear.loadIndex !== 0) ||
+        (!fitment.dimensions.rear.speedIndex && fitment.dimensions.rear.speedIndex !== '0');
     }
 
     static async getInstance() {

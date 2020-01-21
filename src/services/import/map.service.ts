@@ -63,6 +63,8 @@ export class MapService {
 
     async unmarshalVehicle(raw: IImportFitment): Promise<IVehicle> {
         const kwToPsKoeff = 1.35962;
+        const lastMonth = 12;
+        const firstMonth = 1;
         return {
             id: raw.vehicleId,
             hsntsn: this.unmarshalHsnTsn(raw.hsntsn),
@@ -72,9 +74,9 @@ export class MapService {
             manufacturer: await this.checkAndGetManufacturer(raw.manufacturer, raw.imageName),
             platform: raw.platform,
             startBuildYear: raw.startBuildYear,
-            startBuildMonth: raw.startBuildMonth,
+            startBuildMonth: raw.startBuildMonth !== 0 ? raw.startBuildMonth : firstMonth, // GAAS-596
             endBuildYear: raw.endBuildYear,
-            endBuildMonth: raw.endBuildMonth,
+            endBuildMonth: raw.endBuildMonth !== 0 ? raw.endBuildMonth : lastMonth, // GAAS-596
             segmentId: await this.getDictionaryKey(DictionaryTables.SEGMENT, raw.segment),
             fuelId: await this.getDictionaryKey(DictionaryTables.FUEL, raw.fuel),
             volume: raw.hubraum,
