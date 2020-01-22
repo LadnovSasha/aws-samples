@@ -165,10 +165,10 @@ export class ImportService {
                 ) as s1
             ),
             "engineDescription" = ${this.vehicleTable}."engineDescription" || excluded."engineDescription",
-            tpms = excluded.tpms, "engineSizePs" = excluded."engineSizePs", hsntsn = excluded.hsntsn, code = excluded.code
+            tpms = excluded.tpms, "engineSizePs" = excluded."engineSizePs", hsntsn = excluded.hsntsn, code = v.code
         `;
         const { text, values } = this.squel.insert(this.squelOptions)
-            .into(this.vehicleTable)
+            .into(`${this.vehicleTable} as v`)
             .setFieldsRows(vehicles)
             .toParam();
 
