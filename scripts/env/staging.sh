@@ -15,3 +15,4 @@ dbsubnetgroup="${bamboo_fitment_lambda_staging_dbsubnetgroup}"
 vpcsubnet="${bamboo_fitment_lambda_staging_vpcsubnet}"
 
 nautilusbrowserapikey="${bamboo_fitment_lambda_staging_nautilusbrowserapikey}"
+b2capikey="${bamboo_fitment_lambda_staging_b2capikey}"

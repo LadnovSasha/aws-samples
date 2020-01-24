@@ -86,6 +86,7 @@ node_modules/.bin/serverless deploy \
                     --pg-password="${pg_password}" \
                     --commitHash="${bamboo_repository_revision_number}" \
                     --nautilusBrowserApiKey="${nautilusbrowserapikey}" \
+                    --b2cApiKey="${b2capikey}" \
                     --deployTime="${deploytime}" \
                     --version="${app_version}" \
                     --force
