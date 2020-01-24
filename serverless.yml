@@ -134,12 +134,12 @@ functions:
   getCarByMake:
     handler: src/fitment/handler.getCarByMake
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
-    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
     - http:
         path: ${self:provider.environment.API_VERSION}/{country}/car/make/{make}/{model}
         method: get
         cors: true
+        private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
         documentation:
           summary: Returns a list of vehicles for given make.
           description: Returns a list of vehicles for given make.
@@ -153,12 +153,12 @@ functions:
   getCarById:
     handler: src/fitment/handler.getCarById
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
-    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
     - http:
         path: ${self:provider.environment.API_VERSION}/{country}/car/{vehicleId}
         method: get
         cors: true
+        private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
         documentation:
           summary: Returns the result of a quick health status of the API.
           description: Returns the result of a quick health status of the API.
@@ -172,12 +172,12 @@ functions:
   getCarByHsnTsn:
     handler: src/fitment/handler.getCarByHsnTsn
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
-    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
     - http:
         path: ${self:provider.environment.API_VERSION}/{country}/car/hsn/{hsn}/{tsn}
         method: get
         cors: true
+        private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
         documentation:
           summary: Returns the result of a quick health status of the API.
           description: Returns the result of a quick health status of the API.
@@ -191,12 +191,12 @@ functions:
   getOriginalManufacturers:
     handler: src/fitment/handler.getOriginalManufacturers
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
-    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
     - http:
         path: ${self:provider.environment.API_VERSION}/{country}/car/oem
         method: get
         cors: true
+        private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
         documentation:
           summary: Returns the result of a quick health status of the API.
           description: Returns the result of a quick health status of the API.
@@ -210,12 +210,12 @@ functions:
   getCarByOriginalEquipmentMake:
     handler: src/fitment/handler.getCarByOriginalEquipmentMake
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
-    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
     - http:
         path: ${self:provider.environment.API_VERSION}/{country}/car/oem/{make}
         method: get
         cors: true
+        private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
         documentation:
           summary: Returns the result of a quick health status of the API.
           description: Returns the result of a quick health status of the API.
@@ -229,12 +229,12 @@ functions:
   getCarCodesByMake:
     handler: src/fitment/handler.getCarCodesByMake
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
-    private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
     events:
     - http:
         path: ${self:provider.environment.API_VERSION}/{country}/car/model/{make}
         method: get
         cors: true
+        private: ${file(./sls/${opt:stage, self:provider.stage}.yml):endpointIsPrivate}
         documentation:
           summary: Returns a list of vehicles for given make.
           description: Returns a list of vehicles for given make.

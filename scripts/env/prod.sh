@@ -14,3 +14,4 @@ vpcsecuritygroup="${bamboo_fitment_lambda_prod_vpcsecuritygroup}"
 vpcsubnet="${bamboo_fitment_lambda_prod_vpcsubnet}"
 
 nautilusbrowserapikey="${bamboo_fitment_lambda_prod_nautilusbrowserapikey}"
+b2capikey="${bamboo_fitment_lambda_prod_b2capikey}"
