@@ -96,6 +96,14 @@ Resources:
       KeyType: API_KEY
       UsagePlanId:
         Ref: ApiGatewayUsagePlan
+  FitmentSizeLambdaUsagePlanKey:
+    Type: "AWS::ApiGateway::UsagePlanKey"
+    DependsOn: ApiGatewayUsagePlan
+    Properties :
+      KeyId: ${opt:b2cApiKey}
+      KeyType: API_KEY
+      UsagePlanId:
+        Ref: ApiGatewayUsagePlan
   requestBodyValidator:
     Type: 'AWS::ApiGateway::RequestValidator'
     Properties:
