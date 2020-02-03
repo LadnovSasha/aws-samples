@@ -1,6 +1,6 @@
 {
   "name": "fitment-lambda",
-  "version": "1.0.59",
+  "version": "1.0.60",
   "description": "",
   "main": "./dist/src/index.js",
   "scripts": {

@@ -105,11 +105,7 @@ describe('src/services/import/import.service', () => {
             dbMock.query.resetHistory();
             await instance.importRows({ fileName: mockFileName, data: emptySpeedAndLoadMockData });            
             const [, values] = dbMock.query.getCall(5).args;
-            const parsedValues = JSON.parse(values[4]);
-            expect(parsedValues.front.loadIndex).toEqual(0);
-            expect(parsedValues.front.speedIndex).toEqual('0');
-            expect(parsedValues.rear.loadIndex).toEqual(0);
-            expect(parsedValues.rear.speedIndex).toEqual('0');
+            expect(values.length).toEqual(0);
         });
 
         it('should set correct fromMonth and toMonth for importVehicles', async () => {

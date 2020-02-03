@@ -290,10 +290,10 @@ export class ImportService {
     }
 
     protected areSpeedOrLoadNull(fitment: IFitment) {
-        return (!fitment.dimensions.front.loadIndex && fitment.dimensions.front.loadIndex !== 0) ||
-        (!fitment.dimensions.front.speedIndex && fitment.dimensions.front.speedIndex !== '0') ||
-        (!fitment.dimensions.rear.loadIndex && fitment.dimensions.rear.loadIndex !== 0) ||
-        (!fitment.dimensions.rear.speedIndex && fitment.dimensions.rear.speedIndex !== '0');
+        return (!fitment.dimensions.front.loadIndex || fitment.dimensions.front.loadIndex === 0) ||
+        (!fitment.dimensions.front.speedIndex || fitment.dimensions.front.speedIndex === '0') ||
+        (!fitment.dimensions.rear.loadIndex || fitment.dimensions.rear.loadIndex === 0) ||
+        (!fitment.dimensions.rear.speedIndex || fitment.dimensions.rear.speedIndex === '0');
     }
 
     static async getInstance() {
