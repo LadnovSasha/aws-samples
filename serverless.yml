@@ -96,20 +96,22 @@ functions:
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
     events:
     - s3:
-        bucket: Import
+        bucket: ${self:provider.environment.BUCKET}
         event: s3:ObjectCreated:*
         rules:
           - prefix: dictionaries/
+        existing: true
   importFitments:
     handler: src/import/handler.importFitments
     vpc: ${file(./sls/${opt:stage, self:provider.stage}.yml):vpc}
     timeout: 900
     events:
     - s3:
-        bucket: Import
+        bucket: ${self:provider.environment.BUCKET}
         event: s3:ObjectCreated:*
         rules:
           - prefix: import/
+        existing: true
     warmup:
       enabled: false
   getManufacturers:
