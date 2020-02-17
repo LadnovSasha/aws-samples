@@ -73,9 +73,9 @@ export class MapService {
             tpms: SapService.unmarshalBoolean(raw.pressureMonitoringSystem),
             manufacturer: await this.checkAndGetManufacturer(raw.manufacturer, raw.imageName),
             platform: raw.platform,
-            startBuildYear: raw.startBuildYear,
+            startBuildYear: this.unmarshalYear(raw.startBuildYear),
             startBuildMonth: raw.startBuildMonth !== 0 ? raw.startBuildMonth : firstMonth, // GAAS-596
-            endBuildYear: raw.endBuildYear,
+            endBuildYear: this.unmarshalYear(raw.endBuildYear),
             endBuildMonth: raw.endBuildMonth !== 0 ? raw.endBuildMonth : lastMonth, // GAAS-596
             segmentId: await this.getDictionaryKey(DictionaryTables.SEGMENT, raw.segment),
             fuelId: await this.getDictionaryKey(DictionaryTables.FUEL, raw.fuel),
@@ -112,6 +112,10 @@ export class MapService {
         }
 
         return rows[0].key;
+    }
+
+    protected unmarshalYear(year?: number) {
+        return year !== 0 ? year : undefined;
     }
 
     static unmarshalFitment(raw: IImportFitment): IFitment {
