@@ -10,10 +10,10 @@ docker: node:10-slim
 stages:
   - Build:
       - Build
-  - Sonar:
-      manual: true
-      jobs:
-        - Sonar
+  # - Sonar:
+  #     manual: true
+  #     jobs:
+  #       - Sonar
 
 
 Build:
@@ -35,15 +35,15 @@ Build:
       pattern: scripts/**
 
 
-Sonar:
-  tasks:
-    - script:
-        - scripts/sonar.sh
-  docker:
-    image: node:10
-  final-tasks:
-    - script:
-        - echo "Final task Sonar"
+# Sonar:
+#   tasks:
+#     - script:
+#         - scripts/sonar.sh
+#   docker:
+#     image: node:10
+#   final-tasks:
+#     - script:
+#         - echo "Final task Sonar"
 
 
 ---
@@ -55,6 +55,7 @@ deployment:
 
 release-naming:
   next-version-name: 1.0.${bamboo.buildNumber}
+  applies-to-branches: true
 
 
 environments:
@@ -68,6 +69,8 @@ Test:
     gaas_deploy_stage: test
   docker:
     image: node:10-slim
+  triggers:
+    - build-success
   tasks:
     - clean
     - artifact-download:
@@ -148,31 +151,3 @@ environment-permissions:
           - view
           - edit
           - deploy
-      # - groups:
-      #     - gaas-admin
-      #   permissions:
-      #     - view
-      #     - edit
-      #     - deploy
-  # - Staging:
-  #     - groups:
-  #         - gaas-developers
-  #       permissions:
-  #         - view
-  #     # - groups:
-  #     #     - gaas-admin
-  #     #   permissions:
-  #     #     - view
-  #     #     - edit
-  #     #     - deploy
-  # - Prod:
-  #     - groups:
-  #         - gaas-developers
-  #       permissions:
-  #         - view
-  #     # - groups:
-  #     #     - gaas-admin
-  #     #   permissions:
-  #     #     - view
-  #     #     - edit
-  #     #     - deploy
