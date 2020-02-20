@@ -1,6 +1,6 @@
 {
   "name": "fitment-lambda",
-  "version": "1.0.64",
+  "version": "1.0.65",
   "description": "",
   "main": "./dist/src/index.js",
   "scripts": {
@@ -21,8 +21,8 @@
   "dependencies": {
     "aws-xray-sdk": "^2.4.0",
     "csv-parse": "^4.6.3",
-    "fitment-interface": "2.0.14",
-    "lambda-core": "2.1.3",
+    "fitment-interface": "2.0.15",
+    "lambda-core": "2.1.12",
     "lodash.omit": "^4.5.0",
     "pg": "^7.12.1",
     "request": "^2.88.0",

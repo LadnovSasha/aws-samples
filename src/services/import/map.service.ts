@@ -115,7 +115,7 @@ export class MapService {
     }
 
     protected unmarshalYear(year?: number) {
-        return year !== 0 ? year : undefined;
+        return year !== 0 ? year : null;
     }
 
     static unmarshalFitment(raw: IImportFitment): IFitment {
