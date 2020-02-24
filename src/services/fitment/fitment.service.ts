@@ -199,7 +199,7 @@ export class FitmentService {
                     )
                 )
             )`, 'fitments')
-            .left_join('fitments', 'fitments', 'v.id = fitments."vehicleId"')
+            .join('fitments', 'fitments', 'v.id = fitments."vehicleId"')
             .group('v.id')
             .group('m.key')
             .group('st.key')
@@ -208,7 +208,7 @@ export class FitmentService {
             .group('mt.key');
     }
 
-    protected buildLocale(country: string, language?: string) {
+    protected buildLocale(country: string, language: string = '') {
         return `${country}_${language}`;
     }
 
