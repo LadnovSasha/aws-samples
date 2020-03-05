@@ -15,6 +15,7 @@ export class ImportService {
     static colSize = 50;
 
     protected fitmentTable = 'fitments';
+    protected firstEntry = true;
     protected vehicleTable = 'vehicles';
     protected modelTypes = 'modeltypes';
     protected squel = squel.useFlavour('postgres');
@@ -35,11 +36,16 @@ export class ImportService {
     }
 
     async importRows({ data, fileName }: { fileName: string, data: string[] }) {
+        if (this.firstEntry) {
+            data.shift(); // remove header from csv
+        }
+        this.firstEntry = false;
         const locale = this.getLocaleFromFileName(fileName);
         const { unique, duplicated } = this.mapAndUniqueByVehicleId(data, locale);
         await this.importModels(unique, locale);
         await this.insertVehicles(unique);
         await this.insertFitments(unique.concat(duplicated));
+        await this.cleanupVehicles();
     }
 
     protected mapAndUniqueByVehicleId(data: string[], locale: string) {
@@ -139,6 +145,14 @@ export class ImportService {
             .toParam();
 
         await this.executeDBQuery(text + onConflictClause, values, `Insert fitments ${JSON.stringify(fitments)}`);
+    }
+
+    protected async cleanupVehicles(
+    ) {
+        await this.executeDBQuery(`
+        DELETE FROM vehicles v
+        WHERE NOT EXISTS (Select 1 from fitments WHERE fitments."vehicleId" = v.id)
+        `, [], 'Error in cleanup');
     }
 
     @Injectable()
@@ -258,7 +272,7 @@ export class ImportService {
     @Injectable()
     public async parseStreamedFile<T>(
         fileName: string,
-        @Inject('ParseService', { delimiter: ImportService.delimeter }, { skipHeader: true }) parser?: ParseService,
+        @Inject('ParseService', { delimiter: ImportService.delimeter }) parser?: ParseService,
     ): Promise<void> {
         const stream = this.file.getReadable(fileName);
         await parser!.parseChunkData(stream, fileName, async (result: { fileName: string, data: string[] }) => await this.importRows(result));

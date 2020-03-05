@@ -23,7 +23,8 @@ describe('src/services/import/import.service', () => {
     });
 
     describe('importRows()', () => {
-        const instance: ImportService = new ImportService();
+        const instance: any = new ImportService();
+        instance.firstEntry = false;
         const dbMock = {
             query: sinon.stub().resolves({ rows: [{ key: 'key', vehicleId: ['test'] }] }),
         };
@@ -103,17 +104,24 @@ describe('src/services/import/import.service', () => {
 
         it('should set null values for loadIndex and speedIndex for importFitments', async () => {
             dbMock.query.resetHistory();
-            await instance.importRows({ fileName: mockFileName, data: emptySpeedAndLoadMockData });            
+            await instance.importRows({ fileName: mockFileName, data: emptySpeedAndLoadMockData });
             const [, values] = dbMock.query.getCall(5).args;
             expect(values.length).toEqual(0);
         });
 
         it('should set correct fromMonth and toMonth for importVehicles', async () => {
             dbMock.query.resetHistory();
-            await instance.importRows({ fileName: mockFileName, data: emptyMonthsMockData });            
+            await instance.importRows({ fileName: mockFileName, data: emptyMonthsMockData });
             const [, values] = dbMock.query.getCall(4).args;
             expect(values[8]).toEqual(1);
             expect(values[10]).toEqual(12);
+        });
+
+        it('should perform db cleanup for vehicles that have no fitments', async () => {
+            dbMock.query.resetHistory();
+            await instance.importRows({ fileName: mockFileName, data: emptyMonthsMockData });
+            const [query] = dbMock.query.getCall(6).args;
+            expect(query).toMatch(/DELETE from vehicles/i);
         });
     });
 
