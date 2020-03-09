@@ -3,7 +3,7 @@ DATABASE_URL:
   "Fn::Join":
   - ""
   -
-    - "postgres://${opt:pg-user, 'developer'}:${opt:pg-password, 'developerSuperPWD'}@"
+    - "postgres://${opt:pg-user, 'xxxxx'}:${opt:pg-password, 'xxxxxxxxxxxxxxx'}@"
     - "Fn::GetAtt": [DBInstance, Endpoint.Address]
     - ":"
     - "Fn::GetAtt": [DBInstance, Endpoint.Port]
@@ -73,8 +73,8 @@ Resources:
       BackupRetentionPeriod: 0
       DBInstanceClass: db.t2.micro
       DBInstanceIdentifier: ${self:provider.environment.DB_IDENTIFIER}
-      MasterUsername: ${opt:pg-user, "developer"}
-      MasterUserPassword: ${opt:pg-password, "developerSuperPWD"}
+      MasterUsername: ${opt:pg-user, "xxxxxxxxxx"}
+      MasterUserPassword: ${opt:pg-password, "xxxxxxxxx"}
       DBName: fitment
       Engine: postgres
   requestBodyValidator:

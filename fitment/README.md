@@ -1,11 +1,11 @@
-# Goodyear as a Service - Fitment Lambda
+# Fitment Lambda
 This is a basic application that can be provided by serverless framework.
 Should be used as a key framework for new one.
 
 ## Requirements
 To run it locally you need to have:
 
-* [nodejs](https://nodejs.org/uk/download/) (version >= 8.10)
+* [nodejs](https://nodejs.org/uk/download/) (version >= 10.x)
 * [npm](https://nodejs.org/uk/download/package-manager/#debian-and-ubuntu-based-linux-distributions) (version >= 6.0) - Usually a part of nodejs
 
 ## Installation

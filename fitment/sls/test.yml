@@ -3,7 +3,7 @@ DATABASE_URL:
   "Fn::Join":
   - ""
   -
-    - "postgres://${opt:pg-user, 'developer'}:${opt:pg-password, 'developerSuperPWD'}@"
+    - "postgres://${opt:pg-user}:${opt:pg-password}@"
     - "Fn::GetAtt": [DBInstance, Endpoint.Address]
     - ":"
     - "Fn::GetAtt": [DBInstance, Endpoint.Port]
@@ -73,8 +73,8 @@ Resources:
       BackupRetentionPeriod: 0
       DBInstanceClass: db.t2.small
       DBInstanceIdentifier: ${self:provider.environment.DB_IDENTIFIER}
-      MasterUsername: ${opt:pg-user, "developer"}
-      MasterUserPassword: ${opt:pg-password, "developerSuperPWD"}
+      MasterUsername: ${opt:pg-user}
+      MasterUserPassword: ${opt:pg-password}
       DBName: fitment
       Engine: postgres
       StorageEncrypted: true
@@ -83,7 +83,7 @@ Resources:
     Type: "AWS::ApiGateway::UsagePlanKey"
     DependsOn: ApiGatewayUsagePlan
     Properties :
-      KeyId: ${opt:nautilusBrowserApiKey, 'm5vmux7nci'}
+      KeyId: ${opt:nautilusBrowserApiKey}
       KeyType: API_KEY
       UsagePlanId:
         Ref: ApiGatewayUsagePlan
@@ -102,11 +102,11 @@ Resources:
   ApiGatewayLatency: ${file(./sls/monitoring.yml):ApiGatewayLatency}
 
 customDomain:
-  domainName: api-gaas-test.goodyear.eu
+  domainName: api-xxxxxxxx-test.xxxxxxxxxxxxxx.eu
   basePath: fitment
   endpointType: regional
-  certificateName: api-gaas-tst.goodyear.eu
-  hostedZoneId: Z1U9ULNL0V5AJ3
+  certificateName: api-xxxxxxx-tst.xxxxxxxxxxxx.eu
+  hostedZoneId: zoneId
   stage: '${opt:stage, self:provider.stage}'
   createRoute53Record: true
   enabled: true

@@ -74,9 +74,9 @@ export class MapService {
             manufacturer: await this.checkAndGetManufacturer(raw.manufacturer, raw.imageName),
             platform: raw.platform,
             startBuildYear: this.unmarshalYear(raw.startBuildYear),
-            startBuildMonth: raw.startBuildMonth !== 0 ? raw.startBuildMonth : firstMonth, // GAAS-596
+            startBuildMonth: raw.startBuildMonth !== 0 ? raw.startBuildMonth : firstMonth,
             endBuildYear: this.unmarshalYear(raw.endBuildYear),
-            endBuildMonth: raw.endBuildMonth !== 0 ? raw.endBuildMonth : lastMonth, // GAAS-596
+            endBuildMonth: raw.endBuildMonth !== 0 ? raw.endBuildMonth : lastMonth,
             segmentId: await this.getDictionaryKey(DictionaryTables.SEGMENT, raw.segment),
             fuelId: await this.getDictionaryKey(DictionaryTables.FUEL, raw.fuel),
             volume: raw.hubraum,
